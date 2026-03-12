@@ -55,6 +55,10 @@ with st.sidebar:
 
     # --- UPLOAD STRUCTURE (VISIBLE) ---
     st.subheader("📁 Upload Structure")
+    
+    # ADD THIS LINE:
+    st.caption("📱 **Mobile Users:** If your upload fails, tap your screen's menu (••• or compass) and select **Open in Safari/Chrome**.")
+    
     base_file = st.file_uploader("Original Hotel (Structure)", type=['png', 'jpg', 'jpeg'])
 
 # --- 3. MAIN TITLE WITH DYNAMIC LOGO & ACTION BUTTON ---
@@ -208,3 +212,4 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
