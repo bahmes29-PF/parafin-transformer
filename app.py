@@ -23,15 +23,20 @@ with st.sidebar:
 
     # --- AUTO-LOAD API KEY ---
     default_api_key = ""
-    # Look for secrets.toml in a local .streamlit folder
-    secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
-    if os.path.exists(secrets_path):
-        try:
-            with open(secrets_path, "rb") as f:
-                secrets_data = tomllib.load(f)
-                if "GOOGLE_API_KEY" in secrets_data:
-                    default_api_key = secrets_data["GOOGLE_API_KEY"]
-        except Exception: pass 
+    
+    # 1. Try to load from Streamlit Cloud Secrets
+    if "GOOGLE_API_KEY" in st.secrets:
+        default_api_key = st.secrets["GOOGLE_API_KEY"]
+    # 2. Fallback to local file for desktop testing
+    else:
+        secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
+        if os.path.exists(secrets_path):
+            try:
+                with open(secrets_path, "rb") as f:
+                    secrets_data = tomllib.load(f)
+                    if "GOOGLE_API_KEY" in secrets_data:
+                        default_api_key = secrets_data["GOOGLE_API_KEY"]
+            except Exception: pass 
 
     api_key = st.text_input("Google API Key", value=default_api_key, type="password")
     st.divider()
@@ -183,4 +188,5 @@ if st.session_state.render_history:
             st.image(img, use_container_width=True)
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
+
                 st.rerun()
