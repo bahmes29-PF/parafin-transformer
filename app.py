@@ -19,7 +19,7 @@ title_col1, title_col2 = st.columns([1, 8], vertical_alignment="center")
 
 with title_col1:
     # Make sure this filename perfectly matches the logo you put in your assets folder
-    logo_path = os.path.join(ASSETS_DIR, "city_express_signage.png")
+    logo_path = os.path.join(ASSETS_DIR, "city_express_signage.PNG")
     if os.path.exists(logo_path):
         st.image(logo_path, use_container_width=True)
 
@@ -194,6 +194,7 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
 
 
