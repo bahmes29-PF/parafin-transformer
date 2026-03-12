@@ -182,16 +182,12 @@ if convert_pressed and base_file and auto_refs:
                 f"SIGNAGE LOGIC: {signage_logic} \n"
                 "QUALITY: Photorealistic 8k architectural render."
             )
-
-            # MODIFIED: Explicitly label the image roles within the contents array
-            contents = [
-                system_instruction, 
-                "\n--- TARGET CANVAS (100% GEOMETRY AND PERSPECTIVE LOCK) ---\n",
-                process_base
-            ]
+           
+            # MODIFIED: Skip auto_refs if the brand is Spark
+            contents = [system_instruction, process_base]
             
-            if auto_refs:
-                contents.append("\n--- STYLE REFERENCES (EXTRACT BRAND TEXTURES ONLY. DO NOT COPY GEOMETRY, PERSPECTIVE, OR BACKGROUND) ---\n")
+            # We only append reference images for brands other than Spark
+            if "Spark" not in brand_choice:
                 for ref_path in auto_refs:
                     contents.append(Image.open(ref_path))
 
@@ -237,6 +233,7 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
 
 
