@@ -119,6 +119,18 @@ if convert_pressed and base_file and auto_refs:
             ratio_val = orig_width / orig_height
             chosen_ratio = "16:9" if ratio_val > 1.5 else "4:3" if ratio_val > 1.2 else "1:1"
 
+            # --- PHOTOREALISTIC RENDERING PROTOCOL ---
+            rendering_logic = (
+                "\nULTRA-PHOTOREALISTIC RENDERING PROTOCOL: \n"
+                "1. GLOBAL ILLUMINATION & BOUNCED LIGHT: Every new material must react to the scene's light source. "
+                "Calculated bounced light from the ground/pavement must reflect on the lower facade. \n"
+                "2. AMBIENT OCCLUSION: Generate high-fidelity contact shadows (AO) in all corners, window reveals, "
+                "and where the canopy meets the wall to ensure physical depth and prevent a flat look. \n"
+                "3. MATERIAL PHYSICS: New paint must have a 'Satin Stucco' finish. It must catch specular highlights "
+                "on sun-facing edges and show subtle texture variations. No flat or matte fills. \n"
+                "4. LOGO ILLUMINATION: If signage is placed, render subtle drop shadows and physical mounting depth."
+            )
+
             # BRAND STANDARDS: PTW-003-SW COLOR SPEC + SINGLE LINE ENFORCEMENT
             if "City Express" in brand_choice:
                 brand_instr = (
@@ -142,16 +154,17 @@ if convert_pressed and base_file and auto_refs:
                     "   - IF a projecting drive-under canopy (porte-cochere) already exists: Paint ONLY the uppermost horizontal trim line (highest parapet edge) in Deep Navy Blue. \n"
                     "   - IF NO projecting canopy exists in the original photo: DO NOT build or invent one. Keep the original entrance geometry exactly as it is. \n"
                     "   - CRITICAL: Do NOT paint canopy support columns blue; they must follow the Base Material Audit (masonry/stucco)."
+                    f"{rendering_logic}"
                 )
             elif "Spark" in brand_choice:
                 brand_instr = (
                     "MATERIAL AUDIT & SPECIFIC OVERRIDE (SPARK BY HILTON): \n"
                     "1. THE BASE CANVAS (PT-20): Analyze the primary body of the building facade (brick, stucco, EIFS). "
-                    "Paint the vast majority of the main building massing a clean, Light Gray (PT-20)[cite: 51]. "
+                    "Paint the vast majority of the main building massing a clean, Light Gray (PT-20). "
                     "Apply a 'Digital Power Wash' to remove all weathering, making it look refreshed and modern. \n"
                     "2. DARK ACCENTS (PT-21): Identify structural insets, recessed window bays, or secondary architectural volumes. "
-                    "Paint these areas a Dark Accent Gray/Slate (PT-21) to create depth[cite: 51]. \n"
-                    "3. THE SPARK GEOMETRIC MURAL (PT-24 FOCAL): This must be a FULL-HEIGHT vertical intervention[cite: 62]. \n"
+                    "Paint these areas a Dark Accent Gray/Slate (PT-21) to create depth. \n"
+                    "3. THE SPARK GEOMETRIC MURAL (PT-24 FOCAL): This must be a FULL-HEIGHT vertical intervention. \n"
                     "   A. VERTICAL DOMINANCE: Identify the most prominent architectural 'bump out' or vertical bay. "
                     "Apply the geometric mural starting from the top of the ground-floor base all the way to "
                     "the uppermost roofline parapet of that specific section. It must cover the entire "
@@ -162,19 +175,20 @@ if convert_pressed and base_file and auto_refs:
                     "   C. GEOMETRIC DENSITY & CONTINUITY: Maintain the floor-height triangle scale, ensuring they "
                     "stack vertically without gaps. The pattern must be applied as a continuous canvas—render "
                     "pattern colors over or behind windows/mullions without creating boundaries or 'cut-outs' around glass. \n"
-                    "   D. PLACEMENT GUARDRAIL: Do NOT cover the whole building in this pattern; it is a localized, asymmetrical focal mural[cite: 62]. \n"
-                    "4. PORTE COCHERE (CANOPY) LOGIC: If a projecting drive-under canopy exists, you may apply the geometric triangle mural to the UNDERSIDE (ceiling) of the canopy[cite: 46], or paint the canopy fascia PT-20 Light Gray. Keep columns clean. \n"
-                    "5. SIGNAGE PLACEMENT RULE: The primary 'Spark' logo MUST ONLY appear on the solid, lightest gray exterior paint (PT-20)[cite: 83]. Do NOT place the logo over the busy geometric mural or dark accents. \n"
-                    "6. ROOF PRESERVATION (PT-23): The exact pitched roof or skyline must remain completely unaltered in geometry, but you may update the roof color to match the PT-23 spec if applicable[cite: 39]. \n"
-                    "7. TRIM (PT-22): Keep architectural trim and details painted in the designated PT-22 color[cite: 37]."
+                    "   D. PLACEMENT GUARDRAIL: Do NOT cover the whole building in this pattern; it is a localized, asymmetrical focal mural. \n"
+                    "4. PORTE COCHERE (CANOPY) LOGIC: If a projecting drive-under canopy exists, you may apply the geometric triangle mural to the UNDERSIDE (ceiling) of the canopy, or paint the canopy fascia PT-20 Light Gray. Keep columns clean. \n"
+                    "5. SIGNAGE PLACEMENT RULE: The primary 'Spark' logo MUST ONLY appear on the solid, lightest gray exterior paint (PT-20). Do NOT place the logo over the busy geometric mural or dark accents. \n"
+                    "6. ROOF PRESERVATION (PT-23): The exact pitched roof or skyline must remain completely unaltered in geometry, but you may update the roof color to match the PT-23 spec if applicable. \n"
+                    "7. TRIM (PT-22): Keep architectural trim and details painted in the designated PT-22 color."
+                    f"{rendering_logic}"
                 )
 
             # 3. CONTEXTUAL SIGNAGE ANCHOR (ZERO-TOLERANCE 1:1 REPLACEMENT)
             signage_logic = (
                 "STRICT SIGNAGE ANCHORING (1:1 ONLY): \n"
-                "1. THE 'EXISTING SIGN' MASK: Identify every physical logo and sign in the original photo[cite: 79]. \n"
-                "2. 1:1 REPLACEMENT ONLY: Replace existing signage with the brand specified ONLY in the existing signage locations[cite: 79]. \n"
-                "3. NO NEW PLACEMENTS: If a wall is blank in the original photo, it MUST remain 100% blank in the render. Do not invent or add new signs[cite: 46]. \n"
+                "1. THE 'EXISTING SIGN' MASK: Identify every physical logo and sign in the original photo. \n"
+                "2. 1:1 REPLACEMENT ONLY: Replace existing signage with the brand specified ONLY in the existing signage locations. \n"
+                "3. NO NEW PLACEMENTS: If a wall is blank in the original photo, it MUST remain 100% blank in the render. Do not invent or add new signs. \n"
                 "4. MAJOR PROTRUSIONS: Major protrusions or large elements on the facade must be painted the Deep Navy Blue (PTW-004-SW) color palette, but they MUST REMAIN BLANK with no signage unless a sign was already there in the input image."
             )
 
@@ -191,7 +205,7 @@ if convert_pressed and base_file and auto_refs:
                 f"SIGNAGE LOGIC: {signage_logic} \n"
                 "QUALITY: Photorealistic 8k architectural render."
             )
-           
+            
             # MODIFIED: Skip auto_refs if the brand is Spark
             contents = [system_instruction, process_base]
             
@@ -242,16 +256,3 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
-
-
-
-
-
-
-
-
-
-
-
-
-
