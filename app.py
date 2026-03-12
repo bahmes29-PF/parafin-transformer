@@ -183,9 +183,17 @@ if convert_pressed and base_file and auto_refs:
                 "QUALITY: Photorealistic 8k architectural render."
             )
 
-            contents = [system_instruction, process_base]
-            for ref_path in auto_refs:
-                contents.append(Image.open(ref_path))
+            # MODIFIED: Explicitly label the image roles within the contents array
+            contents = [
+                system_instruction, 
+                "\n--- TARGET CANVAS (100% GEOMETRY AND PERSPECTIVE LOCK) ---\n",
+                process_base
+            ]
+            
+            if auto_refs:
+                contents.append("\n--- STYLE REFERENCES (EXTRACT BRAND TEXTURES ONLY. DO NOT COPY GEOMETRY, PERSPECTIVE, OR BACKGROUND) ---\n")
+                for ref_path in auto_refs:
+                    contents.append(Image.open(ref_path))
 
             response = client.models.generate_content(
                 model='gemini-3.1-flash-image-preview',
@@ -229,6 +237,7 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
 
 
