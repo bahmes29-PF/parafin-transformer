@@ -71,7 +71,7 @@ with title_col1:
         logo_filename = "city_express_signage.PNG"
     else:
         # Change this string to exactly match whatever your Spark logo file is named
-        logo_filename = "spark_logo.png" 
+        logo_filename = "spark_signage.png" 
         
     logo_path = os.path.join(ASSETS_DIR, logo_filename)
     
@@ -227,5 +227,6 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
 
