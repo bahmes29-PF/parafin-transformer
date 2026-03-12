@@ -8,7 +8,7 @@ import tomllib
 
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
-st.title("🏨 Hotel Brand Transformer")
+st.title("🏨 Hotel Brand Converter")
 
 # Assets Directory (Dynamic Relative Path)
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
@@ -190,4 +190,5 @@ if st.session_state.render_history:
                 st.session_state.render_img = st.session_state.render_history[idx]
 
                 st.rerun()
+
 
