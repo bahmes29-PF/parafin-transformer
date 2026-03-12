@@ -57,9 +57,8 @@ with st.sidebar:
     st.subheader("📁 Upload Structure")
     base_file = st.file_uploader("Original Hotel (Structure)", type=['png', 'jpg', 'jpeg'])
 
-# --- 3. MAIN TITLE WITH DYNAMIC LOGO ---
+# --- 3. MAIN TITLE WITH DYNAMIC LOGO & ACTION BUTTON ---
 # The [1, 10] ratio makes the logo column small and the title column large.
-# vertical_alignment="center" ensures the image and text line up perfectly.
 title_col1, title_col2 = st.columns([1, 10], vertical_alignment="center")
 
 with title_col1:
@@ -81,6 +80,11 @@ with title_col1:
 with title_col2:
     st.title("Hotel Brand Converter")
 
+st.write("") # Small visual spacer
+# Button is now placed immediately after the title
+convert_pressed = st.button("Convert!", type="primary")
+st.divider()
+
 # --- 4. CLIENT INITIALIZATION ---
 if not api_key:
     st.warning("Please configure your Google API Key in the Streamlit Cloud Secrets dashboard.")
@@ -94,13 +98,11 @@ col1, col2 = st.columns(2)
 if base_file:
     with col1:
         current_display_base = Image.open(base_file)
-        # CHANGED: Replaced hardcoded width with use_container_width=True
         st.image(current_display_base, caption="Original Structure", use_container_width=True)
 
 # --- 6. THE PRECISION ENGINE ---
-st.divider() 
-
-if st.button("🚀 Generate Precision Render", type="primary") and base_file and auto_refs:
+# The engine now listens for the 'convert_pressed' variable from step 3
+if convert_pressed and base_file and auto_refs:
     with st.spinner(f"Applying Marriott Standards (PG 17-25)..."):
         try:
             process_base = Image.open(base_file)
@@ -184,11 +186,12 @@ if st.button("🚀 Generate Precision Render", type="primary") and base_file and
 
         except Exception as e:
             st.error(f"⚠️ Error: {e}")
+elif convert_pressed:
+    st.warning("Please upload a structure image in the sidebar before converting.")
 
-# --- 6. RENDER DISPLAY & CAROUSEL ---
+# --- 7. RENDER DISPLAY & CAROUSEL ---
 if st.session_state.render_img:
     with col2:
-        # CHANGED: Replaced hardcoded width with use_container_width=True
         st.image(st.session_state.render_img, caption=f"{brand_choice} Concept", use_container_width=True)
         buf = io.BytesIO()
         st.session_state.render_img.save(buf, format="PNG")
