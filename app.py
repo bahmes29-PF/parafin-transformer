@@ -7,7 +7,7 @@ import io
 import tomllib
 
 # --- 1. CONFIGURATION & UI SETUP ---
-st.set_page_config(page_title="Parafin: Brand Transformer", layout="wide")
+st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
 # Assets Directory (Dynamic Relative Path)
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
@@ -24,7 +24,7 @@ with title_col1:
         st.image(logo_path, use_container_width=True)
 
 with title_col2:
-    st.title("Hotel Brand Transformer")
+    st.title("Hotel Brand Converter")
 
 if "render_history" not in st.session_state: st.session_state.render_history = []
 if "render_img" not in st.session_state: st.session_state.render_img = None
@@ -194,5 +194,6 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
 
