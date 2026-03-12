@@ -157,14 +157,18 @@ if convert_pressed and base_file and auto_refs:
                     "Paint these Slate/Accent Gray (PT-21). "
                     "CRITICAL: Keep the accent areas minimal. Do NOT use this color within "
                     "or directly adjacent to the main geometric mural area. \n"
-                    "3. THE SPARK GEOMETRIC MURAL (PT-24 FOCAL): ... (maintain your current single-floor scaling) ... "
-                    "A. VIBRANCE OVERRIDE: Modify the color balance to be VIBRANT. Lime Green (40%) and "
-                    "Lavender/Violet (40%) must dominate the mural area. Limit Slate/Dark accents to <20% "
-                    "within the pattern. This ensures the mural pops. \n"
-                    "B. SURFACE CONTINUITY: Do NOT allow windows to break or fragment the pattern. "
-                    "The pattern must be applied as if the walls were a continuous canvas. Extend "
-                    "pattern colors over or behind windows/mullions without creating boundaries."
-                    "Do NOT cover the whole building in this pattern; it is a localized, asymmetrical focal mural. \n"
+                    # REFINED VERTICAL MASSING LOGIC:
+                    "3. THE SPARK GEOMETRIC MURAL (PT-24 FOCAL): This must be a FULL-HEIGHT vertical intervention. \n"
+                    "A. VERTICAL DOMINANCE: Identify the most prominent architectural 'bump out' or vertical bay. "
+                    "Apply the geometric mural starting from the top of the ground-floor base all the way to "
+                    "the uppermost roofline parapet of that specific section. It must cover the entire "
+                    "vertical height of the identified massing. \n"
+                    "B. GEOMETRIC DENSITY & CONTINUITY: Maintain the floor-height triangle scale, ensuring they "
+                    "stack vertically without gaps. The pattern must be applied as a continuous canvas—render "
+                    "pattern colors over or behind windows/mullions without creating boundaries or 'cut-outs' around glass. \n"
+                    "C. COLOR RATIO: Ensure the Lime Green and Violet/Lavender occupy 80% of this "
+                    "vertical column to maximize prominence against the Light Gray (PT-20) primary body. \n" # Added \n here for safety
+                    "Do NOT cover the whole building in this pattern; it is a localized, asymmetrical focal mural." # Removed the trailing \n if this is the last line
                     "4. PORTE COCHERE (CANOPY) LOGIC: If a projecting drive-under canopy exists, you may apply the geometric triangle mural to the UNDERSIDE (ceiling) of the canopy, or paint the canopy fascia PT-20 Light Gray. Keep columns clean. \n"
                     "5. SIGNAGE PLACEMENT RULE: The primary 'Spark' logo MUST ONLY appear on the solid, lightest gray exterior paint (PT-20). Do NOT place the logo over the busy geometric mural or dark accents. \n"
                     "6. ROOF PRESERVATION (PT-23): The exact pitched roof or skyline must remain completely unaltered in geometry, but you may update the roof color to match the PT-23 spec if applicable. \n"
@@ -243,6 +247,7 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
 
 
