@@ -151,13 +151,14 @@ if convert_pressed and base_file and auto_refs:
                     "Apply a 'Digital Power Wash' to remove all weathering, making it look refreshed and modern. \n"
                     "2. DARK ACCENTS (PT-21): Identify structural insets, recessed window bays, or secondary architectural volumes. "
                     "Paint these areas a Dark Accent Gray/Slate (PT-21) to create depth. \n"
-                    # MODIFIED SPARK MURAL LOGIC:
-                    "3. THE SPARK GEOMETRIC MURAL (PT-24 FOCAL): This is a large-scale architectural wrap. "
-                    "Apply the mural to the primary focal massing (e.g., the elevator tower or main entrance block). "
-                    "CRITICAL SCALE: The geometric triangles must be MASSIVE. A single triangle should span "
-                    "at least two floor heights vertically. The mural must WRAP AROUND CORNERS continuously "
-                    "to cover at least two adjacent perpendicular wall faces. The pattern should 'bleed' behind "
-                    "windows and architectural trim as if the building was painted before the windows were installed. "
+                    # REFINED SPARK MURAL SCALING LOGIC:
+                    "3. THE SPARK GEOMETRIC MURAL (PT-24 FOCAL): This is a localized architectural accent. "
+                    "CRITICAL SCALE CONSTRAINT: The geometric pattern must be composed of NUMEROUS smaller "
+                    "intersecting triangles. Each individual triangle should be approximately the height "
+                    "of ONE standard floor level. Do NOT allow a single triangle to span multiple floors. "
+                    "The mural should be contained within a single vertical 'bay' or column of the facade "
+                    "(typically the width of two windows). This ensures the pattern looks like a deliberate "
+                    "architectural texture rather than an oversized graphic. "
                     "Maintain the strict palette: Violet (35%), Lavender (25%), Slate (20%), and bright Lime Green (15%)."
                     "Do NOT cover the whole building in this pattern; it is a localized, asymmetrical focal mural. \n"
                     "4. PORTE COCHERE (CANOPY) LOGIC: If a projecting drive-under canopy exists, you may apply the geometric triangle mural to the UNDERSIDE (ceiling) of the canopy, or paint the canopy fascia PT-20 Light Gray. Keep columns clean. \n"
@@ -238,6 +239,7 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
 
 
