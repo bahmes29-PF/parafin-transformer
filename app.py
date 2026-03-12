@@ -7,8 +7,8 @@ import io
 import tomllib
 
 # --- 1. CONFIGURATION & UI SETUP ---
-st.set_page_config(page_title="Parafin: Brand Transformer", layout="wide")
-st.title("🏨 Hotel Brand Transformer")
+st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
+st.title("Hotel Brand Converter")
 
 # Assets Directory (Dynamic Relative Path)
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
@@ -166,7 +166,7 @@ if st.button("🚀 Generate Precision Render", type="primary") and base_file and
 if st.session_state.render_img:
     with col2:
         # CHANGED: Replaced hardcoded width with use_container_width=True
-        st.image(st.session_state.render_img, caption=f"Active {brand_choice} Render", use_container_width=True)
+        st.image(st.session_state.render_img, caption=f"{brand_choice} Concept", use_container_width=True)
         buf = io.BytesIO()
         st.session_state.render_img.save(buf, format="PNG")
         st.download_button("💾 Save Render", buf.getvalue(), "parafin_render.png", "image/png")
@@ -181,3 +181,4 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
