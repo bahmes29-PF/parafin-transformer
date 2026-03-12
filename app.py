@@ -7,8 +7,8 @@ import io
 import tomllib
 
 # --- 1. CONFIGURATION & UI SETUP ---
-st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
-st.title("🏨 Hotel Brand Converter")
+st.set_page_config(page_title="Parafin: Brand Transformer", layout="wide")
+st.title("🏨 Hotel Brand Transformer")
 
 # Assets Directory (Dynamic Relative Path)
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
@@ -19,14 +19,12 @@ if "last_base_file" not in st.session_state: st.session_state.last_base_file = N
 
 # --- 2. SIDEBAR CONTROLS ---
 with st.sidebar:
-    st.header("⚙️ Configuration")
-
-    # --- AUTO-LOAD API KEY ---
-    default_api_key = ""
     
+    # --- SILENT API KEY LOAD (HIDDEN FROM UI) ---
+    api_key = ""
     # 1. Try to load from Streamlit Cloud Secrets
     if "GOOGLE_API_KEY" in st.secrets:
-        default_api_key = st.secrets["GOOGLE_API_KEY"]
+        api_key = st.secrets["GOOGLE_API_KEY"]
     # 2. Fallback to local file for desktop testing
     else:
         secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
@@ -35,13 +33,10 @@ with st.sidebar:
                 with open(secrets_path, "rb") as f:
                     secrets_data = tomllib.load(f)
                     if "GOOGLE_API_KEY" in secrets_data:
-                        default_api_key = secrets_data["GOOGLE_API_KEY"]
+                        api_key = secrets_data["GOOGLE_API_KEY"]
             except Exception: pass 
-
-    api_key = st.text_input("Google API Key", value=default_api_key, type="password")
-    st.divider()
     
-    # --- BRAND SELECTOR ---
+    # --- BRAND SELECTOR (VISIBLE) ---
     st.subheader("🎯 Brand Template")
     brand_choice = st.selectbox("Select Target Brand", ["City Express by Marriott", "Spark by Hilton"])
     
@@ -52,25 +47,24 @@ with st.sidebar:
     if os.path.exists(ASSETS_DIR):
         all_files = os.listdir(ASSETS_DIR)
         auto_refs = [os.path.join(ASSETS_DIR, f) for f in all_files if search_string in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-    
-    if auto_refs:
-        st.caption(f"✅ {len(auto_refs)} local assets loaded.")
         
     st.divider()
     
-    # --- BRAND CUSTOMIZATION ---
-    st.subheader("🎨 Brand Customization")
-    blue_inset_pct = st.slider("Blue Inset Distribution (%)", min_value=0, max_value=100, value=30, step=10, help="Controls how many of the repetitive recessed window bays get painted Deep Navy Blue.")
+    # --- BRAND CUSTOMIZATION (SILENT VARIABLES) ---
+    # The slider is removed, but the variable remains so the engine logic doesn't break
+    blue_inset_pct = 30 
 
-    st.divider()
+    # --- UPLOAD STRUCTURE (VISIBLE) ---
     st.subheader("📁 Upload Structure")
     base_file = st.file_uploader("Original Hotel (Structure)", type=['png', 'jpg', 'jpeg'])
 
-    viewer_width = st.slider("Adjust Viewer Width", 400, 1500, 800, 50)
+    # --- VIEWER WIDTH (SILENT VARIABLE) ---
+    # The slider is removed, fixed to a clean default size
+    viewer_width = 800 
 
 # --- 3. CLIENT INITIALIZATION ---
 if not api_key:
-    st.warning("Please enter or auto-load your Google API Key.")
+    st.warning("Please configure your Google API Key in the Streamlit Cloud Secrets dashboard.")
     st.stop()
 
 client = genai.Client(api_key=api_key, http_options=types.HttpOptions(api_version='v1alpha'))
@@ -188,7 +182,4 @@ if st.session_state.render_history:
             st.image(img, use_container_width=True)
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
-
                 st.rerun()
-
-
