@@ -7,11 +7,24 @@ import io
 import tomllib
 
 # --- 1. CONFIGURATION & UI SETUP ---
-st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
-st.title("Hotel Brand Converter")
+st.set_page_config(page_title="Parafin: Brand Transformer", layout="wide")
 
 # Assets Directory (Dynamic Relative Path)
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+
+# --- MAIN TITLE WITH LOGO ---
+# The [1, 8] ratio makes the logo column small and the title column large.
+# vertical_alignment="center" ensures the image and text line up perfectly.
+title_col1, title_col2 = st.columns([1, 8], vertical_alignment="center")
+
+with title_col1:
+    # Make sure this filename perfectly matches the logo you put in your assets folder
+    logo_path = os.path.join(ASSETS_DIR, "city_express_logo.png")
+    if os.path.exists(logo_path):
+        st.image(logo_path, use_container_width=True)
+
+with title_col2:
+    st.title("Hotel Brand Transformer")
 
 if "render_history" not in st.session_state: st.session_state.render_history = []
 if "render_img" not in st.session_state: st.session_state.render_img = None
@@ -181,4 +194,5 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
