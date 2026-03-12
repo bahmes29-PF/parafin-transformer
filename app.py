@@ -141,8 +141,23 @@ if convert_pressed and base_file and auto_refs:
                     "   - IF NO projecting canopy exists in the original photo: DO NOT build or invent one. Keep the original entrance geometry exactly as it is. \n"
                     "   - CRITICAL: Do NOT paint canopy support columns blue; they must follow the Base Material Audit (masonry/stucco)."
                 )
-            else:
-                brand_instr = "Apply Spark by Hilton brand colors and materials as shown in references."
+            elif "Spark" in brand_choice:
+                brand_instr = (
+                    "MATERIAL AUDIT & SPECIFIC OVERRIDE (SPARK BY HILTON): \n"
+                    "1. THE BASE CANVAS (PT-20): Analyze the primary body of the building facade (brick, stucco, EIFS). "
+                    "Paint the vast majority of the main building massing a clean, Light Gray (PT-20). "
+                    "Apply a 'Digital Power Wash' to remove all weathering, making it look refreshed and modern. \n"
+                    "2. DARK ACCENTS (PT-21): Identify structural insets, recessed window bays, or secondary architectural volumes. "
+                    "Paint these areas a Dark Accent Gray/Slate (PT-21) to create depth. \n"
+                    "3. THE SPARK GEOMETRIC MURAL (PT-24 FOCAL): This is the critical brand identity. Identify ONE major architectural focal point—either a large blank wall near the main entrance, a prominent corner, or a large continuous surface. "
+                    "Apply a large-scale, asymmetrical, hard-edged geometric mural composed exclusively of intersecting right triangles and diagonals. "
+                    "The color palette for these triangles MUST be strictly: Violet (35%), Lavender (25%), Slate (20%), and bright Lime Green (15%). "
+                    "Do NOT cover the whole building in this pattern; it is a localized, asymmetrical focal mural. \n"
+                    "4. PORTE COCHERE (CANOPY) LOGIC: If a projecting drive-under canopy exists, you may apply the geometric triangle mural to the UNDERSIDE (ceiling) of the canopy, or paint the canopy fascia PT-20 Light Gray. Keep columns clean. \n"
+                    "5. SIGNAGE PLACEMENT RULE: The primary 'Spark' logo MUST ONLY appear on the solid, lightest gray exterior paint (PT-20). Do NOT place the logo over the busy geometric mural or dark accents. \n"
+                    "6. ROOF PRESERVATION (PT-23): The exact pitched roof or skyline must remain completely unaltered in geometry, but you may update the roof color to match the PT-23 spec if applicable. \n"
+                    "7. TRIM (PT-22): Keep architectural trim and details painted in the designated PT-22 color."
+                )
 
             # 3. CONTEXTUAL SIGNAGE ANCHOR (ZERO-TOLERANCE 1:1 REPLACEMENT)
             signage_logic = (
@@ -212,4 +227,5 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
