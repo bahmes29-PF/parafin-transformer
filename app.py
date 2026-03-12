@@ -58,10 +58,6 @@ with st.sidebar:
     st.subheader("📁 Upload Structure")
     base_file = st.file_uploader("Original Hotel (Structure)", type=['png', 'jpg', 'jpeg'])
 
-    # --- VIEWER WIDTH (SILENT VARIABLE) ---
-    # The slider is removed, fixed to a clean default size
-    viewer_width = 800 
-
 # --- 3. CLIENT INITIALIZATION ---
 if not api_key:
     st.warning("Please configure your Google API Key in the Streamlit Cloud Secrets dashboard.")
@@ -75,7 +71,8 @@ col1, col2 = st.columns(2)
 if base_file:
     with col1:
         current_display_base = Image.open(base_file)
-        st.image(current_display_base, caption="Original Structure", width=viewer_width)
+        # CHANGED: Replaced hardcoded width with use_container_width=True
+        st.image(current_display_base, caption="Original Structure", use_container_width=True)
 
 # --- 5. THE PRECISION ENGINE ---
 st.divider() 
@@ -168,7 +165,8 @@ if st.button("🚀 Generate Precision Render", type="primary") and base_file and
 # --- 6. RENDER DISPLAY & CAROUSEL ---
 if st.session_state.render_img:
     with col2:
-        st.image(st.session_state.render_img, caption=f"Active {brand_choice} Render", width=viewer_width)
+        # CHANGED: Replaced hardcoded width with use_container_width=True
+        st.image(st.session_state.render_img, caption=f"Active {brand_choice} Render", use_container_width=True)
         buf = io.BytesIO()
         st.session_state.render_img.save(buf, format="PNG")
         st.download_button("💾 Save Render", buf.getvalue(), "parafin_render.png", "image/png")
