@@ -109,7 +109,8 @@ if base_file:
 # --- 6. THE PRECISION ENGINE ---
 # The engine now listens for the 'convert_pressed' variable from step 3
 if convert_pressed and base_file and auto_refs:
-    with st.spinner(f"Applying Marriott Standards (PG 17-25)..."):
+    # MODIFIED LINE: Spinner now dynamically pulls the selected brand name
+    with st.spinner(f"Applying {brand_choice} Standards..."):
         try:
             process_base = Image.open(base_file)
             orig_width, orig_height = process_base.size
@@ -228,6 +229,7 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
 
 
