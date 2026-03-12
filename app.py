@@ -78,7 +78,8 @@ with title_col1:
         st.error(f"Missing: {logo_filename}")
 
 with title_col2:
-    st.title("Hotel Brand Converter")
+    # CHANGED: Dropped from st.title() to st.header() to reduce font size
+    st.header("Hotel Brand Converter")
 
 st.write("") # Small visual spacer
 # Button is now placed immediately after the title
