@@ -12,20 +12,6 @@ st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 # Assets Directory (Dynamic Relative Path)
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
-# --- MAIN TITLE WITH LOGO ---
-# The [1, 10] ratio makes the logo column small and the title column large.
-# vertical_alignment="center" ensures the image and text line up perfectly.
-title_col1, title_col2 = st.columns([1, 10], vertical_alignment="center")
-
-with title_col1:
-    # Make sure this filename perfectly matches the logo you put in your assets folder
-    logo_path = os.path.join(ASSETS_DIR, "city_express_signage.PNG")
-    if os.path.exists(logo_path):
-        st.image(logo_path, use_container_width=True)
-
-with title_col2:
-    st.title("Hotel Brand Converter")
-
 if "render_history" not in st.session_state: st.session_state.render_history = []
 if "render_img" not in st.session_state: st.session_state.render_img = None
 if "last_base_file" not in st.session_state: st.session_state.last_base_file = None
@@ -71,14 +57,38 @@ with st.sidebar:
     st.subheader("📁 Upload Structure")
     base_file = st.file_uploader("Original Hotel (Structure)", type=['png', 'jpg', 'jpeg'])
 
-# --- 3. CLIENT INITIALIZATION ---
+# --- 3. MAIN TITLE WITH DYNAMIC LOGO ---
+# The [1, 10] ratio makes the logo column small and the title column large.
+# vertical_alignment="center" ensures the image and text line up perfectly.
+title_col1, title_col2 = st.columns([1, 10], vertical_alignment="center")
+
+with title_col1:
+    # Determine which logo to show based on the sidebar selection
+    if "City Express" in brand_choice:
+        logo_filename = "city_express_signage.PNG"
+    else:
+        # Change this string to exactly match whatever your Spark logo file is named
+        logo_filename = "spark_logo.png" 
+        
+    logo_path = os.path.join(ASSETS_DIR, logo_filename)
+    
+    if os.path.exists(logo_path):
+        st.image(logo_path, use_container_width=True)
+    else:
+        # Prints a red error on the UI if the file is missing or spelled wrong
+        st.error(f"Missing: {logo_filename}")
+
+with title_col2:
+    st.title("Hotel Brand Converter")
+
+# --- 4. CLIENT INITIALIZATION ---
 if not api_key:
     st.warning("Please configure your Google API Key in the Streamlit Cloud Secrets dashboard.")
     st.stop()
 
 client = genai.Client(api_key=api_key, http_options=types.HttpOptions(api_version='v1alpha'))
 
-# --- 4. DISPLAY COLUMNS ---
+# --- 5. DISPLAY COLUMNS ---
 col1, col2 = st.columns(2)
 
 if base_file:
@@ -87,7 +97,7 @@ if base_file:
         # CHANGED: Replaced hardcoded width with use_container_width=True
         st.image(current_display_base, caption="Original Structure", use_container_width=True)
 
-# --- 5. THE PRECISION ENGINE ---
+# --- 6. THE PRECISION ENGINE ---
 st.divider() 
 
 if st.button("🚀 Generate Precision Render", type="primary") and base_file and auto_refs:
@@ -194,9 +204,3 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
-
-
-
-
-
-
