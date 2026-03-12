@@ -45,7 +45,8 @@ with st.sidebar:
     auto_refs = []
     if os.path.exists(ASSETS_DIR):
         all_files = os.listdir(ASSETS_DIR)
-        auto_refs = [os.path.join(ASSETS_DIR, f) for f in all_files if search_string in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        # MODIFIED LINE: Added the exclusion for any file containing "signage"
+        auto_refs = [os.path.join(ASSETS_DIR, f) for f in all_files if search_string in f.lower() and "signage" not in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg'))]
         
     st.divider()
     
@@ -227,6 +228,7 @@ if st.session_state.render_history:
             if st.button(f"Recall #{idx+1}", key=f"recall_{idx}"):
                 st.session_state.render_img = st.session_state.render_history[idx]
                 st.rerun()
+
 
 
 
