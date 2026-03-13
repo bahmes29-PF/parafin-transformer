@@ -5,47 +5,9 @@ from google.genai import types
 from PIL import Image
 import io
 import tomllib
-import streamlit.components.v1 as components 
 
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
-
-# --- THE PWA INJECTION BLOCK ---
-components.html(
-    """
-    <script>
-    // 1. Force the custom Parafin manifest from the static assets path
-    const link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = './app/static/manifest.json?v=3'; 
-    document.head.appendChild(link);
-
-    // 2. iOS-specific branding
-    const metaTitle = document.createElement('meta');
-    metaTitle.name = 'apple-mobile-web-app-title';
-    metaTitle.content = 'Parafin';
-    document.head.appendChild(metaTitle);
-
-    const metaApp = document.createElement('meta');
-    metaApp.name = 'apple-mobile-web-app-capable';
-    metaApp.content = 'yes';
-    document.head.appendChild(metaApp);
-
-    const metaStatus = document.createElement('meta');
-    metaStatus.name = 'apple-mobile-web-app-status-bar-style';
-    metaStatus.content = 'black-translucent';
-    document.head.appendChild(metaStatus);
-
-    // 3. Register the Service Worker from assets
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('./app/static/service-worker.js');
-      });
-    }
-    </script>
-    """,
-    height=0,
-)
 
 # Assets Directory (Dynamic Relative Path)
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
