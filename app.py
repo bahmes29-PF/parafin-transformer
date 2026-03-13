@@ -5,37 +5,31 @@ from google.genai import types
 from PIL import Image
 import io
 import tomllib
-import streamlit.components.v1 as components  # Required for Step 3
+import streamlit.components.v1 as components  # <--- Added this
 
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
-# --- ENHANCED PWA REGISTRATION ---
-# This forces the browser to recognize the custom Parafin manifest and standalone mode
+# --- THE PWA INJECTION BLOCK (ADD THIS HERE) ---
 components.html(
     """
     <script>
-    // 1. Force link the custom manifest
+    // 1. Force the custom Parafin manifest
     const link = document.createElement('link');
     link.rel = 'manifest';
-    link.href = '/manifest.json';
+    link.href = '/manifest.json?v=2'; 
     document.head.appendChild(link);
 
-    // 2. Add iOS-specific meta tags for full-screen mode
-    const metaApp = document.createElement('meta');
-    metaApp.name = 'apple-mobile-web-app-capable';
-    metaApp.content = 'yes';
-    document.head.appendChild(metaApp);
-
-    const metaStatus = document.createElement('meta');
-    metaStatus.name = 'apple-mobile-web-app-status-bar-style';
-    metaStatus.content = 'black-translucent';
-    document.head.appendChild(metaStatus);
-
+    // 2. iOS-specific branding
     const metaTitle = document.createElement('meta');
     metaTitle.name = 'apple-mobile-web-app-title';
     metaTitle.content = 'Parafin';
     document.head.appendChild(metaTitle);
+
+    const metaApp = document.createElement('meta');
+    metaApp.name = 'apple-mobile-web-app-capable';
+    metaApp.content = 'yes';
+    document.head.appendChild(metaApp);
 
     // 3. Register the Service Worker
     if ('serviceWorker' in navigator) {
@@ -47,6 +41,10 @@ components.html(
     """,
     height=0,
 )
+
+# Assets Directory (Dynamic Relative Path)
+ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+# ... The rest of your code follows below ...
 
 # Assets Directory (Dynamic Relative Path)
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
