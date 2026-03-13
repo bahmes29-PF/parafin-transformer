@@ -73,7 +73,7 @@ with title_col1:
         logo_filename = "spark_signage.png"
     else:
         # Matches your new Garner signage filename in assets
-        logo_filename = "garner_signage.png"
+        logo_filename = "garner_signage.PNG"
         
     logo_path = os.path.join(ASSETS_DIR, logo_filename)
     
