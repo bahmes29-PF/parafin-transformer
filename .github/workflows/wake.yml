@@ -1,0 +1,12 @@
+name: Wake Streamlit App
+on:
+  schedule:
+    - cron: "0 */4 * * *" # Runs every 4 hours to beat the 12-hour limit
+  workflow_dispatch: # Allows you to run it manually to test
+
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping App URL
+        run: curl -I https://parafin-transformer.streamlit.app # Replace with your actual URL
