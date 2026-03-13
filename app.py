@@ -37,7 +37,7 @@ with st.sidebar:
     
     # --- BRAND SELECTOR (VISIBLE) ---
     st.subheader("🎯 Brand Template")
-    brand_choice = st.selectbox("Select Target Brand", ["City Express by Marriott", "Spark by Hilton"])
+    brand_choice = st.selectbox("Select Target Brand", ["City Express by Marriott", "Spark by Hilton", "Garner by IHG"])
     
     # Logic to find files based on brand string
     search_string = "city_express" if "City Express" in brand_choice else "spark"
@@ -67,12 +67,13 @@ with st.sidebar:
 title_col1, title_col2 = st.columns([1, 10], vertical_alignment="center")
 
 with title_col1:
-    # Determine which logo to show based on the sidebar selection
     if "City Express" in brand_choice:
         logo_filename = "city_express_signage.PNG"
+    elif "Spark" in brand_choice:
+        logo_filename = "spark_signage.png"
     else:
-        # Change this string to exactly match whatever your Spark logo file is named
-        logo_filename = "spark_signage.png" 
+        # Matches your new Garner signage filename in assets
+        logo_filename = "garner_signage.png"
         
     logo_path = os.path.join(ASSETS_DIR, logo_filename)
     
@@ -180,6 +181,24 @@ if convert_pressed and base_file and auto_refs:
                     "5. SIGNAGE PLACEMENT RULE: The primary 'Spark' logo MUST ONLY appear on the solid, lightest gray exterior paint (PT-20). Do NOT place the logo over the busy geometric mural or dark accents. \n"
                     "6. ROOF PRESERVATION (PT-23): The exact pitched roof or skyline must remain completely unaltered in geometry, but you may update the roof color to match the PT-23 spec if applicable. \n"
                     "7. TRIM (PT-22): Keep architectural trim and details painted in the designated PT-22 color."
+                    f"{rendering_logic}"
+                )
+            elif "Garner" in brand_choice:
+                brand_instr = (
+                    "MATERIAL AUDIT & SPECIFIC OVERRIDE (GARNER BY IHG): \n"
+                    "1. THE NEUTRAL FIELD: Identify the primary building massing. Apply a clean, "
+                    "warm greige neutral stucco finish. Use a fine sand-aggregate texture. \n"
+                    "2. DARK CONTRAST SECTIONS: Identify the main entrance tower, recessed window "
+                    "columns, and focal points. Paint these in a Deep Charcoal Gray (Iron Ore) "
+                    "to create strong visual contrast against the neutral field. \n"
+                    "3. THE SEAFOAM SOFFIT: Analyze the porte-cochere or entrance canopy. Paint the "
+                    "UNDERSIDE (ceiling) of the canopy in a signature Seafoam Teal accent color. \n"
+                    "4. PORTE COCHERE FASCIA: The vertical edges (fascia) of the entrance canopy "
+                    "must be painted in the Deep Charcoal Gray to match the focal tower. \n"
+                    "5. SIGNAGE PLACEMENT: Place a prominent white 'Garner by IHG' channel-letter "
+                    "logo on the highest point of the Deep Charcoal focal tower. \n"
+                    "6. LANDSCAPING & BASE: Maintain existing stone/brick bases with a 'Digital "
+                    "Power Wash'. Enhance entrance areas with crisp, focal landscaping imagery."
                     f"{rendering_logic}"
                 )
 
