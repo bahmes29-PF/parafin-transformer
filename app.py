@@ -5,6 +5,7 @@ from google.genai import types
 from PIL import Image
 import io
 import tomllib
+import streamlit.components.v1 as components  # Required for Step 3
 
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
