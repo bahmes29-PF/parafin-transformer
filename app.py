@@ -10,17 +10,37 @@ import streamlit.components.v1 as components  # Required for Step 3
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
-# --- INJECTED STEP 3: PWA REGISTRATION ---
+# --- ENHANCED PWA REGISTRATION ---
+# This forces the browser to recognize the custom Parafin manifest and standalone mode
 components.html(
     """
     <script>
+    // 1. Force link the custom manifest
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = '/manifest.json';
+    document.head.appendChild(link);
+
+    // 2. Add iOS-specific meta tags for full-screen mode
+    const metaApp = document.createElement('meta');
+    metaApp.name = 'apple-mobile-web-app-capable';
+    metaApp.content = 'yes';
+    document.head.appendChild(metaApp);
+
+    const metaStatus = document.createElement('meta');
+    metaStatus.name = 'apple-mobile-web-app-status-bar-style';
+    metaStatus.content = 'black-translucent';
+    document.head.appendChild(metaStatus);
+
+    const metaTitle = document.createElement('meta');
+    metaTitle.name = 'apple-mobile-web-app-title';
+    metaTitle.content = 'Parafin';
+    document.head.appendChild(metaTitle);
+
+    // 3. Register the Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
-          console.log('ServiceWorker registration successful');
-        }, function(err) {
-          console.log('ServiceWorker registration failed: ', err);
-        });
+        navigator.serviceWorker.register('/service-worker.js');
       });
     }
     </script>
