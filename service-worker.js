@@ -1,5 +1,5 @@
-// Change 'v1' to 'v2'
-const CACHE_NAME = 'parafin-v2';
+// Change 'v1' to 'v3'
+const CACHE_NAME = 'parafin-v3';
 const urlsToCache = [
   '/',
   '/assets/icon.png',
