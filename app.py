@@ -17,7 +17,7 @@ components.html(
     // 1. Force the custom Parafin manifest
     const link = document.createElement('link');
     link.rel = 'manifest';
-    link.href = '/manifest.json?v=2'; 
+    link.href = './app/static/manifest.json'; 
     document.head.appendChild(link);
 
     // 2. iOS-specific branding
@@ -34,7 +34,7 @@ components.html(
     // 3. Register the Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/service-worker.js');
+        navigator.serviceWorker.register('./app/static/service-worker.js');
       });
     }
     </script>
