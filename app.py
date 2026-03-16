@@ -5,11 +5,20 @@ from google.genai import types
 from PIL import Image
 import io
 import tomllib
+import base64
+
+# --- HELPER FUNCTION FOR IMAGE CSS ---
+@st.cache_data
+def get_base64_image(image_path):
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    return ""
 
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
-# Target all buttons for styling
+# Parafin Platform Colors
 parafin_blue = "#666B8B"
 grayed_out_bg = "#F5F5F5"
 grayed_out_text = "#888888"
@@ -21,55 +30,64 @@ st.markdown(f"""
     #MainMenu {{visibility: hidden;}}
     header {{visibility: hidden;}}
 
-    /* 2. Target the "Manage app" button and its container specifically */
-    .stAppDeployButton {{
-        display: none !important;
-    }}
-    
-    /* 3. This targets the floating toolbar container at the bottom right */
-    div[data-testid="stStatusWidget"] {{
-        display: none !important;
-    }}
+    /* 2. Target the "Manage app" button */
+    .stAppDeployButton {{ display: none !important; }}
+    div[data-testid="stStatusWidget"] {{ display: none !important; }}
+    [id^="manage-app"], [class*="viewerBadge"] {{ display: none !important; }}
 
-    /* 4. A catch-all for any elements with 'viewer' or 'manage' in the ID */
-    [id^="manage-app"], [class*="viewerBadge"] {{
-        display: none !important;
-    }}
+    /* 3. Clean up the top spacing */
+    .block-container {{ padding-top: 2rem; }}
 
-    /* 5. Clean up the top spacing */
-    .block-container {{
-        padding-top: 2rem;
-    }}
-
-    /* 6. Custom Button Styling */
-    /* Primary (Active/Selected) State */
+    /* 4. Global Button Logic (Active vs Inactive) */
     .stButton > button[kind="primary"] {{
         background-color: {parafin_blue} !important;
         color: white !important;
         border-color: {parafin_blue} !important;
     }}
     .stButton > button[kind="primary"]:hover {{
-        background-color: #555975 !important; /* Slightly darker on hover */
+        background-color: #555975 !important;
         border-color: #555975 !important;
     }}
     
-    /* Secondary (Inactive) & Disabled State */
     .stButton > button[kind="secondary"], 
     .stButton > button:disabled {{
         background-color: {grayed_out_bg} !important;
         color: {grayed_out_text} !important;
         border-color: #E0E0E0 !important;
     }}
-    .stButton > button[kind="secondary"]:hover {{
+    .stButton > button[kind="secondary"]:hover:not(:disabled) {{
         background-color: #E8E8E8 !important;
         color: #555555 !important;
         border-color: #D0D0D0 !important;
+    }}
+
+    /* 5. Brand Logo Transparency & Hover Effects */
+    .brand-logo {{
+        opacity: 0.5;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        padding: 5px;
+        background-color: transparent;
+    }}
+    .brand-logo:hover {{
+        opacity: 1.0;
+        transform: scale(1.05);
+        cursor: pointer;
+    }}
+    .brand-logo-selected {{
+        opacity: 1.0;
+        border: 2px solid {parafin_blue};
+        border-radius: 8px;
+        padding: 5px;
+        background-color: white;
+        box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
     }}
     </style>
 """, unsafe_allow_html=True)
 # ---------------------------
 
-# Assets Directory (Dynamic Relative Path)
+# Assets Directory
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 # --- STATE MANAGEMENT INIT ---
@@ -77,12 +95,11 @@ if "render_history" not in st.session_state: st.session_state.render_history = [
 if "render_img" not in st.session_state: st.session_state.render_img = None
 if "last_base_file" not in st.session_state: st.session_state.last_base_file = None
 
-# New variables for the horizontal workflow
 if "active_step" not in st.session_state: st.session_state.active_step = 'upload'
 if "base_file" not in st.session_state: st.session_state.base_file = None
-if "brand_choice" not in st.session_state: st.session_state.brand_choice = "City Express by Marriott"
+if "brand_choice" not in st.session_state: st.session_state.brand_choice = None 
 
-# --- SILENT API KEY LOAD (Moved from sidebar to hidden background) ---
+# --- SILENT API KEY LOAD ---
 api_key = os.environ.get("GOOGLE_API_KEY")
 
 if not api_key:
@@ -105,18 +122,17 @@ if not api_key:
     st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
 
 
-# --- MAIN TITLE ONLY (LOGO REMOVED) ---
+# --- MAIN TITLE ONLY (LOGO REMOVED FROM HEADER) ---
 st.header("Hotel Brand Converter")
-st.write("") # Small visual spacer
-
+st.write("") 
 
 # --- 2. HORIZONTAL BUTTON WORKFLOW ---
-# Render the logo row first so it sits directly above the buttons
+
+# Dynamic Logo rendering directly ABOVE the Brand Select button
 logo_col1, logo_col2, logo_col3 = st.columns(3)
 
 with logo_col2:
-    # Only show the logo if the image has been uploaded (Step 1 complete)
-    if st.session_state.base_file is not None:
+    if st.session_state.brand_choice is not None:
         if "City Express" in st.session_state.brand_choice:
             logo_filename = "city_express_signage.PNG"
         elif "Spark" in st.session_state.brand_choice:
@@ -125,36 +141,28 @@ with logo_col2:
             logo_filename = "garner_signage.PNG"
             
         logo_path = os.path.join(ASSETS_DIR, logo_filename)
-        
         if os.path.exists(logo_path):
-            # Use nested columns to center the logo perfectly above the button
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
                 st.image(logo_path, use_container_width=True)
-        else:
-            st.error(f"Missing: {logo_filename}")
 
-
-# Determine button styles based on active step
-type_btn1 = "primary" if st.session_state.active_step == 'upload' else "secondary"
-type_btn2 = "primary" if st.session_state.active_step == 'brand' else "secondary"
-type_btn3 = "primary" if st.session_state.active_step == 'convert' else "secondary"
-
+# The 3 Main Workflow Buttons
 b_col1, b_col2, b_col3 = st.columns(3)
 
-# Button 1: Image Upload
+type_btn1 = "primary" if st.session_state.active_step == 'upload' else "secondary"
 if b_col1.button("Image Upload", type=type_btn1, use_container_width=True):
     st.session_state.active_step = 'upload'
     st.rerun()
 
-# Button 2: Brand Select (Disabled if no image uploaded)
 brand_disabled = st.session_state.base_file is None
+type_btn2 = "primary" if st.session_state.active_step == 'brand' else "secondary"
 if b_col2.button("Brand Select", type=type_btn2, disabled=brand_disabled, use_container_width=True):
     st.session_state.active_step = 'brand'
     st.rerun()
 
-# Button 3: Convert (Disabled if no image uploaded)
-convert_pressed = b_col3.button("Convert!", type=type_btn3, disabled=brand_disabled, use_container_width=True)
+convert_disabled = (st.session_state.base_file is None) or (st.session_state.brand_choice is None)
+type_btn3 = "primary" if st.session_state.active_step == 'convert' else "secondary"
+convert_pressed = b_col3.button("Convert!", type=type_btn3, disabled=convert_disabled, use_container_width=True)
 if convert_pressed:
     st.session_state.active_step = 'convert'
 
@@ -169,36 +177,56 @@ if st.session_state.active_step == 'upload':
     uploaded_file = st.file_uploader("Original Hotel (Structure)", type=['png', 'jpg', 'jpeg'])
     if uploaded_file is not None:
         st.session_state.base_file = uploaded_file
-        st.session_state.active_step = 'brand' # Auto-advance to next step
+        st.session_state.active_step = 'brand' 
         st.rerun()
 
 elif st.session_state.active_step == 'brand':
-    st.subheader("🎯 Brand Template")
+    st.subheader("🎯 Select Target Brand")
     
-    # Get current index for the selectbox to remember choice
-    options = ["City Express by Marriott", "Spark by Hilton", "Garner by IHG"]
-    current_idx = options.index(st.session_state.brand_choice) if st.session_state.brand_choice in options else 0
+    # Render the 3 brands side-by-side using Base64 so we can apply the 50% transparency CSS
+    c1, c2, c3 = st.columns(3)
+    brands = [
+        ("City Express by Marriott", "city_express_signage.PNG", c1, "City Express"),
+        ("Spark by Hilton", "spark_signage.png", c2, "Spark"),
+        ("Garner by IHG", "garner_signage.PNG", c3, "Garner")
+    ]
     
-    new_choice = st.selectbox("Select Target Brand", options, index=current_idx)
-    
-    if new_choice != st.session_state.brand_choice:
-        st.session_state.brand_choice = new_choice
-        st.rerun() # Rerun to update the logo instantly
+    for brand_name, img_file, col, short_name in brands:
+        img_path = os.path.join(ASSETS_DIR, img_file)
+        img_b64 = get_base64_image(img_path)
+        
+        # Apply CSS classes and Button types based on selection
+        if st.session_state.brand_choice == brand_name:
+            img_class = "brand-logo-selected"
+            btn_type = "primary" # Turns the button Parafin Blue
+        else:
+            img_class = "brand-logo" # Starts at 50% opacity
+            btn_type = "secondary" # Turns the button F5F5F5
+            
+        with col:
+            if img_b64:
+                st.markdown(f'''
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        <img src="data:image/png;base64,{img_b64}" class="{img_class}" style="max-width: 100%; height: 80px; object-fit: contain;">
+                    </div>
+                ''', unsafe_allow_html=True)
+                
+            if st.button(short_name, key=f"btn_{short_name}", type=btn_type, use_container_width=True):
+                st.session_state.brand_choice = brand_name
+                st.rerun()
 
 
 # --- RESTORE VARIABLES FOR THE ENGINE ---
-# This ensures your existing logic underneath works exactly as before
 base_file = st.session_state.base_file
 brand_choice = st.session_state.brand_choice
 
-# Logic to find files based on brand string
-search_string = "city_express" if "City Express" in brand_choice else "spark"
 auto_refs = []
-if os.path.exists(ASSETS_DIR):
-    all_files = os.listdir(ASSETS_DIR)
-    auto_refs = [os.path.join(ASSETS_DIR, f) for f in all_files if search_string in f.lower() and "signage" not in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+if brand_choice:
+    search_string = "city_express" if "City Express" in brand_choice else "spark" if "Spark" in brand_choice else "garner"
+    if os.path.exists(ASSETS_DIR):
+        all_files = os.listdir(ASSETS_DIR)
+        auto_refs = [os.path.join(ASSETS_DIR, f) for f in all_files if search_string in f.lower() and "signage" not in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg'))]
 
-# The slider is removed, but the variable remains so the engine logic doesn't break
 blue_inset_pct = 30 
 
 
@@ -218,13 +246,12 @@ if base_file:
         st.image(current_display_base, caption="Original Structure", use_container_width=True)
 
 # --- 6. THE PRECISION ENGINE ---
-if convert_pressed and base_file and auto_refs:
+if convert_pressed and base_file and brand_choice and auto_refs:
     with st.spinner(f"Applying {brand_choice} Standards..."):
         try:
             process_base = Image.open(base_file)
             orig_width, orig_height = process_base.size
             
-            # Define chosen_ratio before the API call block
             ratio_val = orig_width / orig_height
             chosen_ratio = "16:9" if ratio_val > 1.5 else "4:3" if ratio_val > 1.2 else "1:1"
 
@@ -333,10 +360,8 @@ if convert_pressed and base_file and auto_refs:
                 "QUALITY: Photorealistic 8k architectural render."
             )
             
-            # Skip auto_refs if the brand is Spark
             contents = [system_instruction, process_base]
             
-            # We only append reference images for brands other than Spark
             if "Spark" not in brand_choice:
                 for ref_path in auto_refs:
                     contents.append(Image.open(ref_path))
@@ -354,7 +379,6 @@ if convert_pressed and base_file and auto_refs:
             for part in response.candidates[0].content.parts:
                 if part.inline_data:
                     raw_img = Image.open(io.BytesIO(part.inline_data.data))
-                    # FORCE PIXEL MATCH
                     final_img = raw_img.resize((orig_width, orig_height), Image.Resampling.LANCZOS)
                     st.session_state.render_history.append(final_img)
                     st.session_state.render_img = final_img
@@ -362,8 +386,6 @@ if convert_pressed and base_file and auto_refs:
 
         except Exception as e:
             st.error(f"⚠️ Error: {e}")
-elif convert_pressed:
-    st.warning("Please upload a structure image before converting.")
 
 # --- 7. RENDER DISPLAY & CAROUSEL ---
 if st.session_state.render_img:
