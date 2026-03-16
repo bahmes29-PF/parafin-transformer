@@ -203,11 +203,11 @@ def process_upload():
             st.session_state.active_step = 'convert'
 
 def process_brand_change():
-    """Fires on selectbox change — updates state before render cycle, no st.rerun() needed"""
+    """Fires on selectbox change — move to 'convert' step so selectbox unmounts, preventing layout shake"""
     new_choice = st.session_state.brand_select_widget
     if new_choice is not None:
         st.session_state.brand_choice = new_choice
-        st.session_state.active_step = 'brand'
+        st.session_state.active_step = 'convert'
 
 
 # --- 3. DYNAMIC UI PANELS ---
