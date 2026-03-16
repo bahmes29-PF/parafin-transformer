@@ -263,18 +263,23 @@ if base_file:
 
 # --- 6. THE PRECISION ENGINE ---
 if convert_pressed and base_file and brand_choice and auto_refs:
-    # Reset active step back to brand so it doesn't stay stuck on success message after converting
     st.session_state.active_step = 'brand'
     
-    # 2. Tell the spinner to render INSIDE the placeholder we made above
     with spinner_placeholder: 
         with st.spinner(f"Applying {brand_choice} Standards..."):
             try:
                 process_base = Image.open(base_file)
                 orig_width, orig_height = process_base.size
-            
-            ratio_val = orig_width / orig_height
-            chosen_ratio = "16:9" if ratio_val > 1.5 else "4:3" if ratio_val > 1.2 else "1:1"
+                
+                # These lines must stay indented inside the 'try'
+                ratio_val = orig_width / orig_height
+                chosen_ratio = "16:9" if ratio_val > 1.5 else "4:3" if ratio_val > 1.2 else "1:1"
+                
+                # ... [REST OF YOUR API & PROMPT CODE HERE] ...
+
+            except Exception as e:
+                # This 'except' must line up vertically with the 'try' above
+                st.error(f"⚠️ Error: {e}")
 
             # --- PHOTOREALISTIC RENDERING PROTOCOL ---
             rendering_logic = (
