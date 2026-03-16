@@ -305,11 +305,11 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     "   - IF a projecting drive-under canopy (porte-cochere) already exists: Paint ONLY the uppermost horizontal trim line (highest parapet edge) in Deep Navy Blue. \n"
                     "   - IF NO projecting canopy exists in the original photo: DO NOT build or invent one. Keep the original entrance geometry exactly as it is. \n"
                     "   - CRITICAL: Do NOT paint canopy support columns blue; they must follow the Base Material Audit (masonry/stucco). \n"
-                    "8. LOGO & SIGNAGE STENCILING: \n"
-                    "   - FINALLY, identify all signage areas on the building (entrance canopies, ground-floor plaques). \n"
-                    "   - APPLY the complete logo lockup 'CITY EXPRESS BY MARRIOTT' from the provided asset as a precise visual stencil over all identified signage areas. \n"
-                    "   - CRITICAL: You must include the 'BY MARRIOTT' sub-text. Render all letters with the *exact* capitalization, font, proportions, and white color seen in the 'city_express_signage.PNG' asset. \n"
-                    "   - DO NOT invent your own font. You are tracing the provided asset. \n"
+                    "8. PHYSICAL SIGNAGE PLAQUE: \n"
+                    "   - FINALLY, identify all primary signage areas on the building. \n"
+                    "   - DO NOT just paint text on the wall. You MUST mount the entire physical sign panel shown in the provided asset. \n"
+                    "   - Render the complete blue rectangular background and the yellow border ring exactly as it appears in the asset. \n"
+                    "   - The text 'CITY EXPRESS BY MARRIOTT' must be inside this physical blue and yellow sign plaque. \n"
                     f"{rendering_logic}"
                 )
             elif "Spark" in brand_choice:
