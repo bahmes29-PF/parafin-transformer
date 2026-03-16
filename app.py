@@ -5,6 +5,15 @@ from google.genai import types
 from PIL import Image
 import io
 import tomllib
+import base64
+
+# --- HELPER FUNCTION FOR IMAGE CSS ---
+@st.cache_data
+def get_base64_image(image_path):
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    return ""
 
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
@@ -21,7 +30,7 @@ st.markdown(f"""
     #MainMenu {{visibility: hidden;}}
     header {{visibility: hidden;}}
 
-    /* 2. Target the "Manage app" button and its container specifically */
+    /* 2. Target the "Manage app" button */
     .stAppDeployButton {{ display: none !important; }}
     div[data-testid="stStatusWidget"] {{ display: none !important; }}
     [id^="manage-app"], [class*="viewerBadge"] {{ display: none !important; }}
@@ -29,45 +38,54 @@ st.markdown(f"""
     /* 3. Clean up the top spacing */
     .block-container {{ padding-top: 2rem; }}
 
-    /* 4. ROCK-SOLID BUTTON STYLING (Mobile-Proof) */
-    /* Primary (Active/Selected) State */
-    button[kind="primary"] {{
+    /* 4. Global Button Logic (Active vs Inactive) */
+    /* Target the ACTIVE (Primary) button state */
+    button[kind="primary"], button[data-testid="baseButton-primary"] {{
         background-color: {parafin_blue} !important;
         color: white !important;
         border-color: {parafin_blue} !important;
-        border-radius: 5px !important;
-        height: 3em !important;
-        -webkit-appearance: none !important; /* Strips mobile browser default styling */
-        appearance: none !important;
-        opacity: 1 !important; /* Prevents mobile browsers from washing out the color */
+        border-radius: 5px;
+        height: 3em;
     }}
-    button[kind="primary"] * {{
-        color: white !important;
-    }}
-    button[kind="primary"]:hover, button[kind="primary"]:focus, button[kind="primary"]:active {{
-        background-color: {parafin_blue} !important; 
-        border-color: {parafin_blue} !important;
-        color: white !important;
+    button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover {{
+        background-color: #555975 !important;
+        border-color: #555975 !important;
     }}
     
-    /* Secondary (Inactive) & Disabled State */
-    button[kind="secondary"], button:disabled {{
+    /* Target the INACTIVE (Secondary) and DISABLED button states */
+    button[kind="secondary"], button[data-testid="baseButton-secondary"], button:disabled {{
         background-color: {grayed_out_bg} !important;
         color: {grayed_out_text} !important;
-        border-color: #E0E0E0 !important;
-        border-radius: 5px !important;
-        height: 3em !important;
-        -webkit-appearance: none !important;
-        appearance: none !important;
-        opacity: 1 !important;
+        border-color: {grayed_out_bg} !important;
+        border-radius: 5px;
+        height: 3em;
     }}
-    button[kind="secondary"] * {{
-        color: {grayed_out_text} !important;
+    button[kind="secondary"]:hover:not(:disabled), button[data-testid="baseButton-secondary"]:hover:not(:disabled) {{
+        background-color: #E8E8E8 !important;
+        color: #555555 !important;
     }}
-    button[kind="secondary"]:hover:not(:disabled), button[kind="secondary"]:focus:not(:disabled), button[kind="secondary"]:active:not(:disabled) {{
-        background-color: {grayed_out_bg} !important;
-        color: {grayed_out_text} !important;
-        border-color: #E0E0E0 !important;
+
+    /* 5. Brand Logo Transparency & Hover Effects */
+    .brand-logo {{
+        opacity: 0.5;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        padding: 5px;
+        background-color: transparent;
+    }}
+    .brand-logo:hover {{
+        opacity: 1.0;
+        transform: scale(1.05);
+        cursor: pointer;
+    }}
+    .brand-logo-selected {{
+        opacity: 1.0;
+        border: 2px solid {parafin_blue};
+        border-radius: 8px;
+        padding: 5px;
+        background-color: white;
+        box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -108,25 +126,13 @@ if not api_key:
     st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
 
 
-# --- MAIN TITLE & PARAFIN LOGO ---
-title_col1, title_col2 = st.columns([1, 6], vertical_alignment="center")
-
-with title_col1:
-    # Restored Parafin Logo with strict sizing
-    parafin_logo_path = os.path.join(ASSETS_DIR, "PF_Logo_2023.png")
-    if os.path.exists(parafin_logo_path):
-        st.image(parafin_logo_path, width=150)
-    else:
-        st.error("PF_Logo_2023.png not found in assets!") 
-
-with title_col2:
-    st.header("Brand Converter")
-
-#st.write("") 
-
+# --- MAIN TITLE ---
+st.header("Hotel Brand Converter")
+st.write("") 
 
 # --- 2. HORIZONTAL BUTTON WORKFLOW ---
-# Dynamic target brand logo rendering directly ABOVE the Brand Select button
+
+# Dynamic Logo rendering directly ABOVE the Brand Select button
 logo_col1, logo_col2, logo_col3 = st.columns(3)
 
 with logo_col2:
@@ -153,7 +159,6 @@ type_btn1 = "primary" if st.session_state.active_step == 'upload' else "secondar
 if b_col1.button("Image Upload", type=type_btn1, use_container_width=True):
     st.session_state.active_step = 'upload'
     st.rerun()
-b_col1.markdown("<div style='text-align: center; font-size: 12px; color: #888888; margin-top: -12px;'>Step 1</div>", unsafe_allow_html=True)
 
 # Button 2: Brand Select
 brand_disabled = st.session_state.base_file is None
@@ -161,59 +166,65 @@ type_btn2 = "primary" if st.session_state.active_step == 'brand' else "secondary
 if b_col2.button("Brand Select", type=type_btn2, disabled=brand_disabled, use_container_width=True):
     st.session_state.active_step = 'brand'
     st.rerun()
-b_col2.markdown("<div style='text-align: center; font-size: 12px; color: #888888; margin-top: -12px;'>Step 2</div>", unsafe_allow_html=True)
 
 # Button 3: Convert!
 convert_disabled = (st.session_state.base_file is None) or (st.session_state.brand_choice is None)
 type_btn3 = "primary" if st.session_state.active_step == 'convert' else "secondary"
 convert_pressed = b_col3.button("Convert!", type=type_btn3, disabled=convert_disabled, use_container_width=True)
-b_col3.markdown("<div style='text-align: center; font-size: 12px; color: #888888; margin-top: -12px;'>Step 3</div>", unsafe_allow_html=True)
-
 
 st.divider()
-
-# --- MOBILE FIX: CALLBACK FUNCTION ---
-def process_upload():
-    """This function only fires AFTER the file is 100% uploaded"""
-    if st.session_state.upload_widget is not None:
-        st.session_state.base_file = st.session_state.upload_widget
-        if st.session_state.brand_choice is None:
-            st.session_state.active_step = 'brand' 
-        else:
-            st.session_state.active_step = 'convert'
 
 
 # --- 3. DYNAMIC UI PANELS ---
 if st.session_state.active_step == 'upload':
-    st.subheader("📁 Image Upload")
+    st.subheader("📁 Upload Structure")
     st.caption("📱 **Mobile Users:** If your upload fails, tap your screen's menu (••• or compass) and select **Open in Safari/Chrome**.")
     
-    st.file_uploader(
-        "Existing Hotel Image", 
-        type=['png', 'jpg', 'jpeg'],
-        key="upload_widget",
-        on_change=process_upload
-    )
+    uploaded_file = st.file_uploader("Original Hotel (Structure)", type=['png', 'jpg', 'jpeg'])
+    if uploaded_file is not None:
+        st.session_state.base_file = uploaded_file
+        st.session_state.active_step = 'brand' 
+        st.rerun()
 
 elif st.session_state.active_step == 'brand':
     st.subheader("🎯 Select Target Brand")
     
-    options = ["City Express by Marriott", "Spark by Hilton", "Garner by IHG"]
-    current_idx = options.index(st.session_state.brand_choice) if st.session_state.brand_choice in options else None
+    # Render the 3 brands side-by-side using Base64 for CSS targeting
+    c1, c2, c3 = st.columns(3)
+    brands = [
+        ("City Express by Marriott", "city_express_signage.PNG", c1, "City Express"),
+        ("Spark by Hilton", "spark_signage.png", c2, "Spark"),
+        ("Garner by IHG", "garner_signage.PNG", c3, "Garner")
+    ]
     
-    new_choice = st.selectbox(
-        "Select Target Brand", 
-        options, 
-        index=current_idx,
-        placeholder="Choose a brand..."
-    )
-    
-    if new_choice != st.session_state.brand_choice and new_choice is not None:
-        st.session_state.brand_choice = new_choice
-        st.session_state.active_step = 'convert'
-        st.rerun() 
+    for brand_name, img_file, col, short_name in brands:
+        img_path = os.path.join(ASSETS_DIR, img_file)
+        img_b64 = get_base64_image(img_path)
+        
+        # Determine styling based on current selection
+        if st.session_state.brand_choice == brand_name:
+            img_class = "brand-logo-selected"
+            btn_type = "primary" 
+        else:
+            img_class = "brand-logo" 
+            btn_type = "secondary" 
+            
+        with col:
+            if img_b64:
+                st.markdown(f'''
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        <img src="data:image/png;base64,{img_b64}" class="{img_class}" style="max-width: 100%; height: 80px; object-fit: contain;">
+                    </div>
+                ''', unsafe_allow_html=True)
+                
+            # When a brand is clicked, advance the step to 'convert'
+            if st.button(short_name, key=f"btn_{short_name}", type=btn_type, use_container_width=True):
+                st.session_state.brand_choice = brand_name
+                st.session_state.active_step = 'convert' # <--- This advances the workflow
+                st.rerun()
 
 elif st.session_state.active_step == 'convert':
+    # Show a ready state so the user knows to click the blue Convert button
     st.success(f"✅ Ready! Click the **Convert!** button above to apply the {st.session_state.brand_choice} brand standards.")
 
 
@@ -244,7 +255,7 @@ col1, col2 = st.columns(2)
 if base_file:
     with col1:
         current_display_base = Image.open(base_file)
-        st.image(current_display_base, caption="Existing Hotel", use_container_width=True)
+        st.image(current_display_base, caption="Original Structure", use_container_width=True)
 
 # --- 6. THE PRECISION ENGINE ---
 if convert_pressed and base_file and brand_choice and auto_refs:
@@ -296,9 +307,9 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     "   - CRITICAL: Do NOT paint canopy support columns blue; they must follow the Base Material Audit (masonry/stucco). \n"
                     "8. LOGO & SIGNAGE STENCILING: \n"
                     "   - FINALLY, identify all signage areas on the building (entrance canopies, ground-floor plaques). \n"
-                    "   - APPLY the text 'CITY EXPRESS' from the provided asset as a precise visual stencil over all identified signage areas. \n"
-                    "   - CRITICAL: Render the letters with the *exact* capitalization, font, and white color seen in the 'city_express_signage.PNG' asset. \n"
-                    "   - ENSURE all uppercase letters (the 'C' and 'E') remain uppercase. \n"
+                    "   - APPLY the complete logo lockup 'CITY EXPRESS BY MARRIOTT' from the provided asset as a precise visual stencil over all identified signage areas. \n"
+                    "   - CRITICAL: You must include the 'BY MARRIOTT' sub-text. Render all letters with the *exact* capitalization, font, proportions, and white color seen in the 'city_express_signage.PNG' asset. \n"
+                    "   - DO NOT invent your own font. You are tracing the provided asset. \n"
                     f"{rendering_logic}"
                 )
             elif "Spark" in brand_choice:
@@ -324,7 +335,12 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     "4. PORTE COCHERE (CANOPY) LOGIC: If a projecting drive-under canopy exists, you may apply the geometric triangle mural to the UNDERSIDE (ceiling) of the canopy, or paint the canopy fascia PT-20 Light Gray. Keep columns clean. \n"
                     "5. SIGNAGE PLACEMENT RULE: The primary 'Spark' logo MUST ONLY appear on the solid, lightest gray exterior paint (PT-20). Do NOT place the logo over the busy geometric mural or dark accents. \n"
                     "6. ROOF PRESERVATION (PT-23): The exact pitched roof or skyline must remain completely unaltered in geometry, but you may update the roof color to match the PT-23 spec if applicable. \n"
-                    "7. TRIM (PT-22): Keep architectural trim and details painted in the designated PT-22 color."
+                    "7. TRIM (PT-22): Keep architectural trim and details painted in the designated PT-22 color. \n"
+                    "8. LOGO & SIGNAGE STENCILING: \n"
+                    "   - FINALLY, identify all signage areas on the building (entrance canopies, ground-floor plaques). \n"
+                    "   - APPLY the complete logo lockup 'spark by Hilton' from the provided asset as a precise visual stencil over all identified signage areas. \n"
+                    "   - CRITICAL: You must include the 'by Hilton' sub-text. Render all letters with the *exact* lowercase formatting for 'spark', font, proportions, and color seen in the 'spark_signage.png' asset. \n"
+                    "   - DO NOT invent your own font. You are tracing the provided asset. \n"
                     f"{rendering_logic}"
                 )
             elif "Garner" in brand_choice:
@@ -342,7 +358,12 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     "5. SIGNAGE PLACEMENT: Place a prominent white 'Garner by IHG' channel-letter "
                     "logo on the highest point of the Deep Charcoal focal tower. \n"
                     "6. LANDSCAPING & BASE: Maintain existing stone/brick bases with a 'Digital "
-                    "Power Wash'. Enhance entrance areas with crisp, focal landscaping imagery."
+                    "Power Wash'. Enhance entrance areas with crisp, focal landscaping imagery. \n"
+                    "7. LOGO & SIGNAGE STENCILING: \n"
+                    "   - FINALLY, identify all signage areas on the building. \n"
+                    "   - APPLY the complete logo lockup 'Garner by IHG' from the provided asset as a precise visual stencil over all identified signage areas. \n"
+                    "   - CRITICAL: You must include the 'by IHG' sub-text. Render the letters with the *exact* capitalization, font, proportions, and styling seen in the 'garner_signage.PNG' asset. \n"
+                    "   - DO NOT invent your own font. You are tracing the provided asset. \n"
                     f"{rendering_logic}"
                 )
 
@@ -365,9 +386,9 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                 "6. SIGNAGE LOCK: DO NOT add new signage. ONLY replace existing signs in their exact original locations. \n"
                 "7. ZERO-TOLERANCE CONTENT LOCKED: \n"
                 "   - IDENTIFY the exact text from the provided signage asset. \n"
-                "   - DO NOT change the capitalization of any letters. (It must be uppercase 'CITY EXPRESS', not 'city express'). \n"
+                "   - DO NOT change the capitalization of any letters. \n"
                 "   - DO NOT change the font, color, or spelling of the logo. \n"
-                "   - DO NOT make any text lowercase if it is uppercase in the reference image. \n"
+                "   - DO NOT make any text lowercase if it is uppercase in the reference image, and vice versa. \n"
                 "8. REFERENCE IMAGE IS A MANDATORY VISUAL TEMPLATE: Treat the attached logo reference image as an immutable visual stencil for any text rendering. \n"
                 "ACT AS A PRECISION SURFACE-LEVEL VISUALIZER. \n"
                 f"BRAND STANDARDS: {brand_instr} \n"
@@ -401,7 +422,6 @@ if convert_pressed and base_file and brand_choice and auto_refs:
 
         except Exception as e:
             st.error(f"⚠️ Error: {e}")
-
 
 # --- 7. RENDER DISPLAY & CAROUSEL ---
 if st.session_state.render_img:
