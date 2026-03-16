@@ -437,8 +437,8 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     st.session_state.render_img = final_img
                     st.rerun()
 
-        except Exception as e:
-            st.error(f"⚠️ Error: {e}")
+    except Exception as e:
+        st.error(f"⚠️ Error: {e}")
 
 # --- 7. RENDER DISPLAY & CAROUSEL ---
 if st.session_state.render_img:
