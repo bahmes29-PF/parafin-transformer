@@ -206,13 +206,13 @@ def process_upload():
             st.session_state.active_step = 'convert'
 
 def use_example():
-    """Picks a random example image from assets and loads it as the base file"""
+    """Picks a random example image from assets — finds any file named example_XX regardless of number or case"""
     candidates = []
-    for ext in ('png', 'jpg', 'jpeg', 'PNG', 'JPG', 'JPEG'):
-        for n in range(1, 5):
-            path = os.path.join(ASSETS_DIR, f"example_0{n}.{ext}")
-            if os.path.exists(path):
-                candidates.append(path)
+    if os.path.exists(ASSETS_DIR):
+        for f in os.listdir(ASSETS_DIR):
+            name, ext = os.path.splitext(f)
+            if name.lower().startswith("example_") and ext.lower() in ('.png', '.jpg', '.jpeg'):
+                candidates.append(os.path.join(ASSETS_DIR, f))
     if candidates:
         chosen = random.choice(candidates)
         st.session_state.base_file = chosen
@@ -243,10 +243,10 @@ if st.session_state.active_step == 'upload':
     )
 
     # Check if any example images exist in assets before showing the option
-    example_exists = any(
-        os.path.exists(os.path.join(ASSETS_DIR, f"example_0{n}.{ext}"))
-        for n in range(1, 5)
-        for ext in ('png', 'jpg', 'jpeg', 'PNG', 'JPG', 'JPEG')
+    example_exists = os.path.exists(ASSETS_DIR) and any(
+        os.path.splitext(f)[0].lower().startswith("example_") and
+        os.path.splitext(f)[1].lower() in ('.png', '.jpg', '.jpeg')
+        for f in os.listdir(ASSETS_DIR)
     )
 
     if example_exists:
@@ -287,13 +287,16 @@ if brand_choice:
     search_string = "city_express" if "City Express" in brand_choice else "spark" if "Spark" in brand_choice else "garner"
     if os.path.exists(ASSETS_DIR):
         all_files = os.listdir(ASSETS_DIR)
-        auto_refs = [
-            os.path.join(ASSETS_DIR, f) for f in all_files
-            if search_string in f.lower()
-            and "signage" not in f.lower()
-            and "example" not in f.lower()
-            and f.lower().endswith(('.png', '.jpg', '.jpeg'))
-        ]
+        seen_basenames = set()
+        for f in sorted(all_files):  # sorted so .PNG wins over .jpg consistently
+            name, ext = os.path.splitext(f)
+            if (search_string in f.lower()
+                    and "signage" not in f.lower()
+                    and "example" not in f.lower()
+                    and ext.lower() in ('.png', '.jpg', '.jpeg')
+                    and name.lower() not in seen_basenames):
+                auto_refs.append(os.path.join(ASSETS_DIR, f))
+                seen_basenames.add(name.lower())
 
 blue_inset_pct = 30
 
