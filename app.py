@@ -120,7 +120,7 @@ with title_col1:
         st.error("PF_Logo_2023.png not found in assets!") 
 
 with title_col2:
-    st.header("Hotel Brand Converter")
+    st.header("Brand Converter")
 
 st.write("") 
 
