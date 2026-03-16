@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import random
 from google import genai
 from google.genai import types
 from PIL import Image
@@ -95,6 +96,7 @@ if "last_base_file" not in st.session_state: st.session_state.last_base_file = N
 if "active_step" not in st.session_state: st.session_state.active_step = 'upload'
 if "base_file" not in st.session_state: st.session_state.base_file = None
 if "brand_choice" not in st.session_state: st.session_state.brand_choice = None
+if "is_example" not in st.session_state: st.session_state.is_example = False
 
 
 # --- SILENT API KEY LOAD ---
@@ -197,6 +199,24 @@ def process_upload():
     """Fires after file is 100% uploaded — updates state before render cycle"""
     if st.session_state.upload_widget is not None:
         st.session_state.base_file = st.session_state.upload_widget
+        st.session_state.is_example = False
+        if st.session_state.brand_choice is None:
+            st.session_state.active_step = 'brand'
+        else:
+            st.session_state.active_step = 'convert'
+
+def use_example():
+    """Picks a random example image from assets and loads it as the base file"""
+    candidates = []
+    for ext in ('png', 'jpg', 'jpeg', 'PNG', 'JPG', 'JPEG'):
+        for n in range(1, 5):
+            path = os.path.join(ASSETS_DIR, f"example_0{n}.{ext}")
+            if os.path.exists(path):
+                candidates.append(path)
+    if candidates:
+        chosen = random.choice(candidates)
+        st.session_state.base_file = chosen
+        st.session_state.is_example = True
         if st.session_state.brand_choice is None:
             st.session_state.active_step = 'brand'
         else:
@@ -221,6 +241,23 @@ if st.session_state.active_step == 'upload':
         key="upload_widget",
         on_change=process_upload
     )
+
+    # Check if any example images exist in assets before showing the option
+    example_exists = any(
+        os.path.exists(os.path.join(ASSETS_DIR, f"example_0{n}.{ext}"))
+        for n in range(1, 5)
+        for ext in ('png', 'jpg', 'jpeg', 'PNG', 'JPG', 'JPEG')
+    )
+
+    if example_exists:
+        st.markdown("<div style='text-align: center; color: #888888; font-size: 13px; margin: 4px 0'>— or —</div>", unsafe_allow_html=True)
+        _, center_col, _ = st.columns([1, 2, 1])
+        with center_col:
+            st.button(
+                "✨ Use an Example Hotel Image",
+                use_container_width=True,
+                on_click=use_example
+            )
 
 elif st.session_state.active_step == 'brand':
     st.subheader("🎯 Select Target Brand")
@@ -250,7 +287,13 @@ if brand_choice:
     search_string = "city_express" if "City Express" in brand_choice else "spark" if "Spark" in brand_choice else "garner"
     if os.path.exists(ASSETS_DIR):
         all_files = os.listdir(ASSETS_DIR)
-        auto_refs = [os.path.join(ASSETS_DIR, f) for f in all_files if search_string in f.lower() and "signage" not in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        auto_refs = [
+            os.path.join(ASSETS_DIR, f) for f in all_files
+            if search_string in f.lower()
+            and "signage" not in f.lower()
+            and "example" not in f.lower()
+            and f.lower().endswith(('.png', '.jpg', '.jpeg'))
+        ]
 
 blue_inset_pct = 30
 
