@@ -106,7 +106,7 @@ with title_col1:
         st.image(parafin_logo_path, use_container_width=True)
 
 with title_col2:
-    st.header("Hotel Brand Converter")
+    st.header("Brand Converter")
 
 st.write("") 
 
