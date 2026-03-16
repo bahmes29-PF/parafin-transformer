@@ -9,7 +9,6 @@ import tomllib
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
-# Update your st.markdown block to this:
 st.markdown("""
     <style>
     /* 1. Hide the footer and hamburger menu */
@@ -43,74 +42,48 @@ st.markdown("""
 # Assets Directory (Dynamic Relative Path)
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
+# --- STATE MANAGEMENT INIT ---
 if "render_history" not in st.session_state: st.session_state.render_history = []
 if "render_img" not in st.session_state: st.session_state.render_img = None
 if "last_base_file" not in st.session_state: st.session_state.last_base_file = None
 
-# --- 2. SIDEBAR CONTROLS ---
-with st.sidebar:
-    
-    # --- SILENT API KEY LOAD ---
-    # We use os.environ.get so it doesn't crash if the secret is missing
-    api_key = os.environ.get("GOOGLE_API_KEY")
-    
-    if not api_key:
-        # We use .get() here instead of "in st.secrets" to avoid the crash
+# New variables for the horizontal workflow
+if "active_step" not in st.session_state: st.session_state.active_step = 'upload'
+if "base_file" not in st.session_state: st.session_state.base_file = None
+if "brand_choice" not in st.session_state: st.session_state.brand_choice = "City Express by Marriott"
+
+# --- SILENT API KEY LOAD (Moved from sidebar to hidden background) ---
+api_key = os.environ.get("GOOGLE_API_KEY")
+
+if not api_key:
+    try:
+        api_key = st.secrets.get("GOOGLE_API_KEY")
+    except:
+        api_key = None
+
+if not api_key:
+    secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
+    if os.path.exists(secrets_path):
         try:
-            api_key = st.secrets.get("GOOGLE_API_KEY")
-        except:
-            api_key = None
-    
-    # If both fail, check the local file
-    if not api_key:
-        secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
-        if os.path.exists(secrets_path):
             with open(secrets_path, "rb") as f:
-                import tomllib
                 secrets_data = tomllib.load(f)
                 api_key = secrets_data.get("GOOGLE_API_KEY")
-    
-    if not api_key:
-        st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
-    
-    # --- BRAND SELECTOR (VISIBLE) ---
-    st.subheader("🎯 Brand Template")
-    brand_choice = st.selectbox("Select Target Brand", ["City Express by Marriott", "Spark by Hilton", "Garner by IHG"])
-    
-    # Logic to find files based on brand string
-    search_string = "city_express" if "City Express" in brand_choice else "spark"
-    
-    auto_refs = []
-    if os.path.exists(ASSETS_DIR):
-        all_files = os.listdir(ASSETS_DIR)
-        # MODIFIED LINE: Added the exclusion for any file containing "signage"
-        auto_refs = [os.path.join(ASSETS_DIR, f) for f in all_files if search_string in f.lower() and "signage" not in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-        
-    st.divider()
-    
-    # --- BRAND CUSTOMIZATION (SILENT VARIABLES) ---
-    # The slider is removed, but the variable remains so the engine logic doesn't break
-    blue_inset_pct = 30 
+        except:
+            pass
 
-    # --- UPLOAD STRUCTURE (VISIBLE) ---
-    st.subheader("📁 Upload Structure")
-    
-    # ADD THIS LINE:
-    st.caption("📱 **Mobile Users:** If your upload fails, tap your screen's menu (••• or compass) and select **Open in Safari/Chrome**.")
-    
-    base_file = st.file_uploader("Original Hotel (Structure)", type=['png', 'jpg', 'jpeg'])
+if not api_key:
+    st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
 
-# --- 3. MAIN TITLE WITH DYNAMIC LOGO & ACTION BUTTON ---
-# The [1, 10] ratio makes the logo column small and the title column large.
+
+# --- MAIN TITLE WITH DYNAMIC LOGO ---
 title_col1, title_col2 = st.columns([1, 10], vertical_alignment="center")
 
 with title_col1:
-    if "City Express" in brand_choice:
+    if "City Express" in st.session_state.brand_choice:
         logo_filename = "city_express_signage.PNG"
-    elif "Spark" in brand_choice:
+    elif "Spark" in st.session_state.brand_choice:
         logo_filename = "spark_signage.png"
     else:
-        # Matches your new Garner signage filename in assets
         logo_filename = "garner_signage.PNG"
         
     logo_path = os.path.join(ASSETS_DIR, logo_filename)
@@ -118,17 +91,74 @@ with title_col1:
     if os.path.exists(logo_path):
         st.image(logo_path, use_container_width=True)
     else:
-        # Prints a red error on the UI if the file is missing or spelled wrong
         st.error(f"Missing: {logo_filename}")
 
 with title_col2:
-    # CHANGED: Dropped from st.title() to st.header() to reduce font size
     st.header("Hotel Brand Converter")
 
 st.write("") # Small visual spacer
-# Button is now placed immediately after the title
-convert_pressed = st.button("Convert!", type="primary")
+
+
+# --- 2. HORIZONTAL BUTTON WORKFLOW ---
+b_col1, b_col2, b_col3 = st.columns(3)
+
+# Button 1: Image Upload
+if b_col1.button("Image Upload", use_container_width=True):
+    st.session_state.active_step = 'upload'
+
+# Button 2: Brand Select (Grayed out if no image uploaded)
+brand_disabled = st.session_state.base_file is None
+if b_col2.button("Brand Select", disabled=brand_disabled, use_container_width=True):
+    st.session_state.active_step = 'brand'
+
+# Button 3: Convert (Grayed out if no image uploaded)
+convert_pressed = b_col3.button("Convert!", disabled=brand_disabled, type="primary", use_container_width=True)
+if convert_pressed:
+    st.session_state.active_step = 'convert'
+
 st.divider()
+
+
+# --- 3. DYNAMIC UI PANELS ---
+if st.session_state.active_step == 'upload':
+    st.subheader("📁 Upload Structure")
+    st.caption("📱 **Mobile Users:** If your upload fails, tap your screen's menu (••• or compass) and select **Open in Safari/Chrome**.")
+    
+    uploaded_file = st.file_uploader("Original Hotel (Structure)", type=['png', 'jpg', 'jpeg'])
+    if uploaded_file is not None:
+        st.session_state.base_file = uploaded_file
+        st.session_state.active_step = 'brand' # Auto-advance to next step
+        st.rerun()
+
+elif st.session_state.active_step == 'brand':
+    st.subheader("🎯 Brand Template")
+    
+    # Get current index for the selectbox to remember choice
+    options = ["City Express by Marriott", "Spark by Hilton", "Garner by IHG"]
+    current_idx = options.index(st.session_state.brand_choice) if st.session_state.brand_choice in options else 0
+    
+    new_choice = st.selectbox("Select Target Brand", options, index=current_idx)
+    
+    if new_choice != st.session_state.brand_choice:
+        st.session_state.brand_choice = new_choice
+        st.rerun() # Rerun to update the logo in the header instantly
+
+
+# --- RESTORE VARIABLES FOR THE ENGINE ---
+# This ensures your existing logic underneath works exactly as before
+base_file = st.session_state.base_file
+brand_choice = st.session_state.brand_choice
+
+# Logic to find files based on brand string
+search_string = "city_express" if "City Express" in brand_choice else "spark"
+auto_refs = []
+if os.path.exists(ASSETS_DIR):
+    all_files = os.listdir(ASSETS_DIR)
+    auto_refs = [os.path.join(ASSETS_DIR, f) for f in all_files if search_string in f.lower() and "signage" not in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+
+# The slider is removed, but the variable remains so the engine logic doesn't break
+blue_inset_pct = 30 
+
 
 # --- 4. CLIENT INITIALIZATION ---
 if not api_key:
@@ -146,9 +176,7 @@ if base_file:
         st.image(current_display_base, caption="Original Structure", use_container_width=True)
 
 # --- 6. THE PRECISION ENGINE ---
-# The engine now listens for the 'convert_pressed' variable from step 3
 if convert_pressed and base_file and auto_refs:
-    # MODIFIED LINE: Spinner now dynamically pulls the selected brand name
     with st.spinner(f"Applying {brand_choice} Standards..."):
         try:
             process_base = Image.open(base_file)
@@ -263,7 +291,7 @@ if convert_pressed and base_file and auto_refs:
                 "QUALITY: Photorealistic 8k architectural render."
             )
             
-            # MODIFIED: Skip auto_refs if the brand is Spark
+            # Skip auto_refs if the brand is Spark
             contents = [system_instruction, process_base]
             
             # We only append reference images for brands other than Spark
@@ -293,7 +321,7 @@ if convert_pressed and base_file and auto_refs:
         except Exception as e:
             st.error(f"⚠️ Error: {e}")
 elif convert_pressed:
-    st.warning("Please upload a structure image in the sidebar before converting.")
+    st.warning("Please upload a structure image before converting.")
 
 # --- 7. RENDER DISPLAY & CAROUSEL ---
 if st.session_state.render_img:
