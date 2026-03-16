@@ -50,28 +50,28 @@ if "last_base_file" not in st.session_state: st.session_state.last_base_file = N
 # --- 2. SIDEBAR CONTROLS ---
 with st.sidebar:
     
-    # --- SILENT API KEY LOAD (UPDATED FOR RAILWAY) ---
-    # This checks Railway's Variables first, then falls back to local files
-    api_key = os.environ.get("GOOGLE_API_KEY")
+    # --- SILENT API KEY LOAD ---
+# We use os.environ.get so it doesn't crash if the secret is missing
+api_key = os.environ.get("GOOGLE_API_KEY")
 
-    if not api_key:
-        # Fallback 1: Streamlit Cloud Secrets
-        if "GOOGLE_API_KEY" in st.secrets:
-            api_key = st.secrets["GOOGLE_API_KEY"]
-        # Fallback 2: Local secrets.toml for desktop testing
-        else:
-            secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
-            if os.path.exists(secrets_path):
-                try:
-                    with open(secrets_path, "rb") as f:
-                        secrets_data = tomllib.load(f)
-                        api_key = secrets_data.get("GOOGLE_API_KEY", "")
-                except Exception:
-                    pass
+if not api_key:
+    # We use .get() here instead of "in st.secrets" to avoid the crash
+    try:
+        api_key = st.secrets.get("GOOGLE_API_KEY")
+    except:
+        api_key = None
 
-    # Safety check: if it's still missing, show an error
-    if not api_key:
-        st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
+# If both fail, check the local file
+if not api_key:
+    secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
+    if os.path.exists(secrets_path):
+        with open(secrets_path, "rb") as f:
+            import tomllib
+            secrets_data = tomllib.load(f)
+            api_key = secrets_data.get("GOOGLE_API_KEY")
+
+if not api_key:
+    st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
     
     # --- BRAND SELECTOR (VISIBLE) ---
     st.subheader("🎯 Brand Template")
