@@ -21,7 +21,7 @@ st.markdown(f"""
     #MainMenu {{visibility: hidden;}}
     header {{visibility: hidden;}}
 
-    /* 2. Target the "Manage app" button */
+    /* 2. Target the "Manage app" button and its container specifically */
     .stAppDeployButton {{ display: none !important; }}
     div[data-testid="stStatusWidget"] {{ display: none !important; }}
     [id^="manage-app"], [class*="viewerBadge"] {{ display: none !important; }}
@@ -29,49 +29,52 @@ st.markdown(f"""
     /* 3. Clean up the top spacing */
     .block-container {{ padding-top: 2rem; }}
 
-    /* 4. ROCK-SOLID BUTTON STYLING */
-    
-    /* Primary (Active) Button */
-    div[data-testid="stButton"] button[data-testid="baseButton-primary"] {{
+    /* 4. ROCK-SOLID BUTTON STYLING (Mobile-Proof) */
+    /* Primary (Active/Selected) State */
+    button[kind="primary"] {{
         background-color: {parafin_blue} !important;
+        color: white !important;
         border-color: {parafin_blue} !important;
         border-radius: 5px !important;
         height: 3em !important;
+        -webkit-appearance: none !important; /* Strips mobile browser default styling */
+        appearance: none !important;
+        opacity: 1 !important; /* Prevents mobile browsers from washing out the color */
     }}
-    div[data-testid="stButton"] button[data-testid="baseButton-primary"] * {{
+    button[kind="primary"] * {{
         color: white !important;
     }}
-    div[data-testid="stButton"] button[data-testid="baseButton-primary"]:hover {{
-        background-color: #555975 !important; 
-        border-color: #555975 !important;
+    button[kind="primary"]:hover, button[kind="primary"]:focus, button[kind="primary"]:active {{
+        background-color: {parafin_blue} !important; 
+        border-color: {parafin_blue} !important;
+        color: white !important;
     }}
     
-    /* Secondary (Inactive) Button */
-    div[data-testid="stButton"] button[data-testid="baseButton-secondary"] {{
+    /* Secondary (Inactive) & Disabled State */
+    button[kind="secondary"], button:disabled {{
         background-color: {grayed_out_bg} !important;
+        color: {grayed_out_text} !important;
         border-color: #E0E0E0 !important;
         border-radius: 5px !important;
         height: 3em !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        opacity: 1 !important;
     }}
-    div[data-testid="stButton"] button[data-testid="baseButton-secondary"] * {{
+    button[kind="secondary"] * {{
         color: {grayed_out_text} !important;
     }}
-    
-    /* Disabled Button */
-    div[data-testid="stButton"] button:disabled {{
+    button[kind="secondary"]:hover:not(:disabled), button[kind="secondary"]:focus:not(:disabled), button[kind="secondary"]:active:not(:disabled) {{
         background-color: {grayed_out_bg} !important;
-        border-color: #E0E0E0 !important;
-        cursor: not-allowed !important;
-    }}
-    div[data-testid="stButton"] button:disabled * {{
         color: {grayed_out_text} !important;
+        border-color: #E0E0E0 !important;
     }}
     </style>
 """, unsafe_allow_html=True)
 # ---------------------------
 
 # Assets Directory
-ASSETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
+ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 # --- STATE MANAGEMENT INIT ---
 if "render_history" not in st.session_state: st.session_state.render_history = []
@@ -109,12 +112,12 @@ if not api_key:
 title_col1, title_col2 = st.columns([1, 6], vertical_alignment="center")
 
 with title_col1:
-    # Restored Parafin Logo with strict sizing to prevent disappearing
+    # Restored Parafin Logo with strict sizing
     parafin_logo_path = os.path.join(ASSETS_DIR, "PF_Logo_2023.png")
     if os.path.exists(parafin_logo_path):
         st.image(parafin_logo_path, width=150)
     else:
-        st.error("PF_Logo_2023.png not found in assets!") # Visible error so we know if the path fails
+        st.error("PF_Logo_2023.png not found in assets!") 
 
 with title_col2:
     st.header("Hotel Brand Converter")
