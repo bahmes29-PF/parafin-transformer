@@ -186,7 +186,7 @@ if st.session_state.active_step == 'upload':
     st.caption("📱 **Mobile Users:** If your upload fails, tap your screen's menu (••• or compass) and select **Open in Safari/Chrome**.")
     
     st.file_uploader(
-        "Original Hotel (Existing)", 
+        "Existing Hotel Image", 
         type=['png', 'jpg', 'jpeg'],
         key="upload_widget",
         on_change=process_upload
@@ -241,7 +241,7 @@ col1, col2 = st.columns(2)
 if base_file:
     with col1:
         current_display_base = Image.open(base_file)
-        st.image(current_display_base, caption="Original Structure", use_container_width=True)
+        st.image(current_display_base, caption="Existing Hotel", use_container_width=True)
 
 # --- 6. THE PRECISION ENGINE ---
 if convert_pressed and base_file and brand_choice and auto_refs:
