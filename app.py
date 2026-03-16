@@ -39,26 +39,30 @@ st.markdown(f"""
     .block-container {{ padding-top: 2rem; }}
 
     /* 4. Global Button Logic (Active vs Inactive) */
-    .stButton > button[kind="primary"] {{
+    /* Target the ACTIVE (Primary) button state */
+    button[kind="primary"], button[data-testid="baseButton-primary"] {{
         background-color: {parafin_blue} !important;
         color: white !important;
         border-color: {parafin_blue} !important;
+        border-radius: 5px;
+        height: 3em;
     }}
-    .stButton > button[kind="primary"]:hover {{
+    button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover {{
         background-color: #555975 !important;
         border-color: #555975 !important;
     }}
     
-    .stButton > button[kind="secondary"], 
-    .stButton > button:disabled {{
+    /* Target the INACTIVE (Secondary) and DISABLED button states */
+    button[kind="secondary"], button[data-testid="baseButton-secondary"], button:disabled {{
         background-color: {grayed_out_bg} !important;
         color: {grayed_out_text} !important;
-        border-color: #E0E0E0 !important;
+        border-color: {grayed_out_bg} !important;
+        border-radius: 5px;
+        height: 3em;
     }}
-    .stButton > button[kind="secondary"]:hover:not(:disabled) {{
+    button[kind="secondary"]:hover:not(:disabled), button[data-testid="baseButton-secondary"]:hover:not(:disabled) {{
         background-color: #E8E8E8 !important;
         color: #555555 !important;
-        border-color: #D0D0D0 !important;
     }}
 
     /* 5. Brand Logo Transparency & Hover Effects */
@@ -122,7 +126,7 @@ if not api_key:
     st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
 
 
-# --- MAIN TITLE ONLY (LOGO REMOVED FROM HEADER) ---
+# --- MAIN TITLE ---
 st.header("Hotel Brand Converter")
 st.write("") 
 
@@ -132,7 +136,7 @@ st.write("")
 logo_col1, logo_col2, logo_col3 = st.columns(3)
 
 with logo_col2:
-    if st.session_state.brand_choice is not None:
+    if st.session_state.brand_choice is not None and st.session_state.base_file is not None:
         if "City Express" in st.session_state.brand_choice:
             logo_filename = "city_express_signage.PNG"
         elif "Spark" in st.session_state.brand_choice:
@@ -146,25 +150,27 @@ with logo_col2:
             with c2:
                 st.image(logo_path, use_container_width=True)
 
+
 # The 3 Main Workflow Buttons
 b_col1, b_col2, b_col3 = st.columns(3)
 
+# Button 1: Image Upload
 type_btn1 = "primary" if st.session_state.active_step == 'upload' else "secondary"
 if b_col1.button("Image Upload", type=type_btn1, use_container_width=True):
     st.session_state.active_step = 'upload'
     st.rerun()
 
+# Button 2: Brand Select
 brand_disabled = st.session_state.base_file is None
 type_btn2 = "primary" if st.session_state.active_step == 'brand' else "secondary"
 if b_col2.button("Brand Select", type=type_btn2, disabled=brand_disabled, use_container_width=True):
     st.session_state.active_step = 'brand'
     st.rerun()
 
+# Button 3: Convert!
 convert_disabled = (st.session_state.base_file is None) or (st.session_state.brand_choice is None)
 type_btn3 = "primary" if st.session_state.active_step == 'convert' else "secondary"
 convert_pressed = b_col3.button("Convert!", type=type_btn3, disabled=convert_disabled, use_container_width=True)
-if convert_pressed:
-    st.session_state.active_step = 'convert'
 
 st.divider()
 
@@ -183,7 +189,7 @@ if st.session_state.active_step == 'upload':
 elif st.session_state.active_step == 'brand':
     st.subheader("🎯 Select Target Brand")
     
-    # Render the 3 brands side-by-side using Base64 so we can apply the 50% transparency CSS
+    # Render the 3 brands side-by-side using Base64 for CSS targeting
     c1, c2, c3 = st.columns(3)
     brands = [
         ("City Express by Marriott", "city_express_signage.PNG", c1, "City Express"),
@@ -195,13 +201,13 @@ elif st.session_state.active_step == 'brand':
         img_path = os.path.join(ASSETS_DIR, img_file)
         img_b64 = get_base64_image(img_path)
         
-        # Apply CSS classes and Button types based on selection
+        # Determine styling based on current selection
         if st.session_state.brand_choice == brand_name:
             img_class = "brand-logo-selected"
-            btn_type = "primary" # Turns the button Parafin Blue
+            btn_type = "primary" 
         else:
-            img_class = "brand-logo" # Starts at 50% opacity
-            btn_type = "secondary" # Turns the button F5F5F5
+            img_class = "brand-logo" 
+            btn_type = "secondary" 
             
         with col:
             if img_b64:
@@ -211,9 +217,15 @@ elif st.session_state.active_step == 'brand':
                     </div>
                 ''', unsafe_allow_html=True)
                 
+            # When a brand is clicked, advance the step to 'convert'
             if st.button(short_name, key=f"btn_{short_name}", type=btn_type, use_container_width=True):
                 st.session_state.brand_choice = brand_name
+                st.session_state.active_step = 'convert' # <--- This advances the workflow
                 st.rerun()
+
+elif st.session_state.active_step == 'convert':
+    # Show a ready state so the user knows to click the blue Convert button
+    st.success(f"✅ Ready! Click the **Convert!** button above to apply the {st.session_state.brand_choice} brand standards.")
 
 
 # --- RESTORE VARIABLES FOR THE ENGINE ---
@@ -247,6 +259,9 @@ if base_file:
 
 # --- 6. THE PRECISION ENGINE ---
 if convert_pressed and base_file and brand_choice and auto_refs:
+    # Reset active step back to brand so it doesn't stay stuck on success message after converting
+    st.session_state.active_step = 'brand'
+    
     with st.spinner(f"Applying {brand_choice} Standards..."):
         try:
             process_base = Image.open(base_file)
