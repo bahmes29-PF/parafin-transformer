@@ -247,7 +247,10 @@ if not api_key:
 
 client = genai.Client(api_key=api_key, http_options=types.HttpOptions(api_version='v1alpha'))
 
-# --- 5. DISPLAY COLUMNS ---
+# --- 5. DISPLAY COLUMNS & SPINNER PLACEHOLDER ---
+# 1. Create an invisible placeholder above the images
+spinner_placeholder = st.empty()
+
 col1, col2 = st.columns(2)
 
 if base_file:
@@ -260,10 +263,12 @@ if convert_pressed and base_file and brand_choice and auto_refs:
     # Reset active step back to brand so it doesn't stay stuck on success message after converting
     st.session_state.active_step = 'brand'
     
-    with st.spinner(f"Applying {brand_choice} Standards..."):
-        try:
-            process_base = Image.open(base_file)
-            orig_width, orig_height = process_base.size
+    # 2. Tell the spinner to render INSIDE the placeholder we made above
+    with spinner_placeholder.container():
+        with st.spinner(f"Applying {brand_choice} Standards..."):
+            try:
+                process_base = Image.open(base_file)
+                orig_width, orig_height = process_base.size
             
             ratio_val = orig_width / orig_height
             chosen_ratio = "16:9" if ratio_val > 1.5 else "4:3" if ratio_val > 1.2 else "1:1"
@@ -305,8 +310,8 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     "   - CRITICAL: Do NOT paint canopy support columns blue; they must follow the Base Material Audit (masonry/stucco). \n"
                     "8. PHYSICAL SIGNAGE PLAQUE & PLACEMENT: \n"
                     "   - FINALLY, identify all primary signage areas on the building. \n"
-                    "   - CRITICAL PLACEMENT RULE: You MUST place the physical sign plaque ONLY on the Warm Off-White stucco walls. \n"
-                    "   - DO NOT place the sign on the Deep Navy Blue architectural elements. If the original hotel had a sign on a wall that is now Navy Blue, you must relocate the new sign to a Warm Off-White surface. \n"
+                    "   - CRITICAL PLACEMENT RULE: You MUST place the physical sign plaque on the location where the existing sign was in the input image, otherwise place on a large flat surface near top of building. \n"
+                    #   - DO NOT place the sign on the Deep Navy Blue architectural elements. If the original hotel had a sign on a wall that is now Navy Blue, you must relocate the new sign to a Warm Off-White surface. \n"
                     "   - DO NOT just paint text on the wall. You MUST mount the entire physical sign panel shown in the provided asset. \n"
                     "   - Render the complete blue rectangular background and the yellow border ring exactly as it appears in the asset. \n"
                     "   - The text 'CITY EXPRESS BY MARRIOTT' must be inside this physical blue and yellow sign plaque. \n"
