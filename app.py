@@ -183,15 +183,22 @@ b_col3.markdown("<div style='text-align: center; font-size: 12px; color: #888888
 st.divider()
 
 
-# --- MOBILE FIX: CALLBACK FUNCTION ---
+# --- CALLBACK FUNCTIONS ---
 def process_upload():
-    """This function only fires AFTER the file is 100% uploaded"""
+    """Fires after file is 100% uploaded — updates state before render cycle"""
     if st.session_state.upload_widget is not None:
         st.session_state.base_file = st.session_state.upload_widget
         if st.session_state.brand_choice is None:
             st.session_state.active_step = 'brand'
         else:
             st.session_state.active_step = 'convert'
+
+def process_brand_change():
+    """Fires on selectbox change — updates state before render cycle, no st.rerun() needed"""
+    new_choice = st.session_state.brand_select_widget
+    if new_choice is not None:
+        st.session_state.brand_choice = new_choice
+        st.session_state.active_step = 'brand'
 
 
 # --- 3. DYNAMIC UI PANELS ---
@@ -212,17 +219,14 @@ elif st.session_state.active_step == 'brand':
     options = ["City Express by Marriott", "Spark by Hilton", "Garner by IHG"]
     current_idx = options.index(st.session_state.brand_choice) if st.session_state.brand_choice in options else None
 
-    new_choice = st.selectbox(
+    st.selectbox(
         "Select Target Brand",
         options,
         index=current_idx,
-        placeholder="Choose a brand..."
+        placeholder="Choose a brand...",
+        key="brand_select_widget",
+        on_change=process_brand_change
     )
-
-    if new_choice != st.session_state.brand_choice and new_choice is not None:
-        st.session_state.brand_choice = new_choice
-        st.session_state.active_step = 'brand'
-        st.rerun()
 
 elif st.session_state.active_step == 'convert':
     st.success(f"✅ Ready! Click the **Convert!** button above to apply the {st.session_state.brand_choice} brand standards.")
