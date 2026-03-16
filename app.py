@@ -51,27 +51,27 @@ if "last_base_file" not in st.session_state: st.session_state.last_base_file = N
 with st.sidebar:
     
     # --- SILENT API KEY LOAD ---
-# We use os.environ.get so it doesn't crash if the secret is missing
-api_key = os.environ.get("GOOGLE_API_KEY")
-
-if not api_key:
-    # We use .get() here instead of "in st.secrets" to avoid the crash
-    try:
-        api_key = st.secrets.get("GOOGLE_API_KEY")
-    except:
-        api_key = None
-
-# If both fail, check the local file
-if not api_key:
-    secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
-    if os.path.exists(secrets_path):
-        with open(secrets_path, "rb") as f:
-            import tomllib
-            secrets_data = tomllib.load(f)
-            api_key = secrets_data.get("GOOGLE_API_KEY")
-
-if not api_key:
-    st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
+    # We use os.environ.get so it doesn't crash if the secret is missing
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    
+    if not api_key:
+        # We use .get() here instead of "in st.secrets" to avoid the crash
+        try:
+            api_key = st.secrets.get("GOOGLE_API_KEY")
+        except:
+            api_key = None
+    
+    # If both fail, check the local file
+    if not api_key:
+        secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
+        if os.path.exists(secrets_path):
+            with open(secrets_path, "rb") as f:
+                import tomllib
+                secrets_data = tomllib.load(f)
+                api_key = secrets_data.get("GOOGLE_API_KEY")
+    
+    if not api_key:
+        st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
     
     # --- BRAND SELECTOR (VISIBLE) ---
     st.subheader("🎯 Brand Template")
