@@ -95,8 +95,21 @@ if not api_key:
     st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
 
 
-# --- MAIN TITLE ONLY (LOGO REMOVED) ---
-st.header("Hotel Brand Converter")
+# --- MAIN TITLE & PARAFIN LOGO ---
+title_col1, title_col2 = st.columns([1, 6], vertical_alignment="center")
+
+with title_col1:
+    # Add the Parafin Logo here
+    parafin_logo_path = os.path.join(ASSETS_DIR, "PF_Logo_2023.png")
+    if os.path.exists(parafin_logo_path):
+        st.image(parafin_logo_path, use_container_width=True)
+    else:
+        # Failsafe so the app doesn't crash if the logo isn't uploaded yet
+        st.caption("Parafin Logo") 
+
+with title_col2:
+    st.header("Brand Converter")
+
 st.write("") 
 
 # --- 2. HORIZONTAL BUTTON WORKFLOW ---
