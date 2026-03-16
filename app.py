@@ -9,7 +9,7 @@ import tomllib
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
-# Target all buttons for styling
+# Parafin Platform Colors
 parafin_blue = "#666B8B"
 grayed_out_bg = "#F5F5F5"
 grayed_out_text = "#888888"
@@ -22,48 +22,40 @@ st.markdown(f"""
     header {{visibility: hidden;}}
 
     /* 2. Target the "Manage app" button and its container specifically */
-    .stAppDeployButton {{
-        display: none !important;
-    }}
-    
-    /* 3. This targets the floating toolbar container at the bottom right */
-    div[data-testid="stStatusWidget"] {{
-        display: none !important;
-    }}
+    .stAppDeployButton {{ display: none !important; }}
+    div[data-testid="stStatusWidget"] {{ display: none !important; }}
+    [id^="manage-app"], [class*="viewerBadge"] {{ display: none !important; }}
 
-    /* 4. A catch-all for any elements with 'viewer' or 'manage' in the ID */
-    [id^="manage-app"], [class*="viewerBadge"] {{
-        display: none !important;
-    }}
+    /* 3. Clean up the top spacing */
+    .block-container {{ padding-top: 2rem; }}
 
-    /* 5. Clean up the top spacing */
-    .block-container {{
-        padding-top: 2rem;
-    }}
-
-    /* 6. Button Styling Globally */
-    .stButton button {{
-        border-radius: 5px;
-        height: 3em;
-        border: 1px solid #E0E0E0; 
-    }}
-
-    /* Active/Pressed States */
-    .stButton button:active,
-    .stButton button[id^="active_"], 
-    .stButton button[data-testid="baseButton-secondary"][id^="upload_btn_active"],
-    .stButton button[data-testid="baseButton-secondary"][id^="select_btn_active"],
-    .stButton button[data-testid="baseButton-primary"]:active {{
+    /* 4. ROCK-SOLID BUTTON STYLING */
+    /* Primary (Active/Selected) State */
+    .stButton > button[kind="primary"] {{
         background-color: {parafin_blue} !important;
         color: white !important;
         border-color: {parafin_blue} !important;
+        border-radius: 5px;
+        height: 3em;
     }}
-
-    /* Inactive/Disabled States */
-    .stButton button:disabled, 
-    .stButton button[data-testid="baseButton-secondary"]:not([id*="_active"]) {{
+    .stButton > button[kind="primary"]:hover {{
+        background-color: #555975 !important; 
+        border-color: #555975 !important;
+    }}
+    
+    /* Secondary (Inactive) & Disabled State */
+    .stButton > button[kind="secondary"], 
+    .stButton > button:disabled {{
         background-color: {grayed_out_bg} !important;
         color: {grayed_out_text} !important;
+        border-color: #E0E0E0 !important;
+        border-radius: 5px;
+        height: 3em;
+    }}
+    .stButton > button[kind="secondary"]:hover:not(:disabled) {{
+        background-color: #E8E8E8 !important;
+        color: #555555 !important;
+        border-color: #D0D0D0 !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -77,7 +69,6 @@ if "render_history" not in st.session_state: st.session_state.render_history = [
 if "render_img" not in st.session_state: st.session_state.render_img = None
 if "last_base_file" not in st.session_state: st.session_state.last_base_file = None
 
-# New variables for the horizontal workflow
 if "active_step" not in st.session_state: st.session_state.active_step = 'upload'
 if "base_file" not in st.session_state: st.session_state.base_file = None
 if "brand_choice" not in st.session_state: st.session_state.brand_choice = None 
@@ -105,25 +96,27 @@ if not api_key:
     st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
 
 
-# --- MAIN TITLE ONLY (LOGO REMOVED) ---
-title_col1, title_col2 = st.columns([1, 10], vertical_alignment="center")
+# --- MAIN TITLE & PARAFIN LOGO ---
+title_col1, title_col2 = st.columns([1, 6], vertical_alignment="center")
 
 with title_col1:
-    pass
+    # Restored Parafin Logo
+    parafin_logo_path = os.path.join(ASSETS_DIR, "PF_Logo_2023.png")
+    if os.path.exists(parafin_logo_path):
+        st.image(parafin_logo_path, use_container_width=True)
 
 with title_col2:
     st.header("Hotel Brand Converter")
 
-st.write("") # Small visual spacer
+st.write("") 
 
 
 # --- 2. HORIZONTAL BUTTON WORKFLOW ---
-# Render the logo row first so it sits directly above the buttons
+# Dynamic target brand logo rendering directly ABOVE the Brand Select button
 logo_col1, logo_col2, logo_col3 = st.columns(3)
 
 with logo_col2:
-    # Only show the logo if BOTH the image is uploaded AND a brand is actually selected
-    if st.session_state.base_file is not None and st.session_state.brand_choice is not None:
+    if st.session_state.brand_choice is not None and st.session_state.base_file is not None:
         if "City Express" in st.session_state.brand_choice:
             logo_filename = "city_express_signage.PNG"
         elif "Spark" in st.session_state.brand_choice:
@@ -132,34 +125,35 @@ with logo_col2:
             logo_filename = "garner_signage.PNG"
             
         logo_path = os.path.join(ASSETS_DIR, logo_filename)
-        
         if os.path.exists(logo_path):
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
                 st.image(logo_path, use_container_width=True)
 
 
+# The 3 Main Workflow Buttons
 b_col1, b_col2, b_col3 = st.columns(3)
 
-upload_btn_key = "upload_btn_active" if st.session_state.active_step == 'upload' else "upload_btn"
-select_btn_key = "select_btn_active" if st.session_state.active_step == 'brand' else "select_btn"
-
-if b_col1.button("Image Upload", key=upload_btn_key, use_container_width=True):
+# Button 1: Image Upload
+type_btn1 = "primary" if st.session_state.active_step == 'upload' else "secondary"
+if b_col1.button("Image Upload", type=type_btn1, use_container_width=True):
     st.session_state.active_step = 'upload'
     st.rerun()
 
-if b_col2.button("Brand Select", disabled=st.session_state.base_file is None, key=select_btn_key, use_container_width=True):
+# Button 2: Brand Select
+brand_disabled = st.session_state.base_file is None
+type_btn2 = "primary" if st.session_state.active_step == 'brand' else "secondary"
+if b_col2.button("Brand Select", type=type_btn2, disabled=brand_disabled, use_container_width=True):
     st.session_state.active_step = 'brand'
     st.rerun()
 
+# Button 3: Convert!
 convert_disabled = (st.session_state.base_file is None) or (st.session_state.brand_choice is None)
-convert_pressed = b_col3.button("Convert!", type="primary", disabled=convert_disabled, use_container_width=True)
+type_btn3 = "primary" if st.session_state.active_step == 'convert' else "secondary"
+convert_pressed = b_col3.button("Convert!", type=type_btn3, disabled=convert_disabled, use_container_width=True)
 
-if convert_pressed:
-    st.session_state.active_step = 'convert'
 
 st.divider()
-
 
 # --- MOBILE FIX: CALLBACK FUNCTION ---
 def process_upload():
@@ -175,8 +169,8 @@ def process_upload():
 # --- 3. DYNAMIC UI PANELS ---
 if st.session_state.active_step == 'upload':
     st.subheader("📁 Upload Structure")
+    st.caption("📱 **Mobile Users:** If your upload fails, tap your screen's menu (••• or compass) and select **Open in Safari/Chrome**.")
     
-    # We pass the callback function here so it handles the UI shift securely
     st.file_uploader(
         "Original Hotel (Structure)", 
         type=['png', 'jpg', 'jpeg'],
@@ -185,7 +179,7 @@ if st.session_state.active_step == 'upload':
     )
 
 elif st.session_state.active_step == 'brand':
-    st.subheader("🎯 Brand Template")
+    st.subheader("🎯 Select Target Brand")
     
     options = ["City Express by Marriott", "Spark by Hilton", "Garner by IHG"]
     current_idx = options.index(st.session_state.brand_choice) if st.session_state.brand_choice in options else None
@@ -199,7 +193,11 @@ elif st.session_state.active_step == 'brand':
     
     if new_choice != st.session_state.brand_choice and new_choice is not None:
         st.session_state.brand_choice = new_choice
+        st.session_state.active_step = 'convert'
         st.rerun() 
+
+elif st.session_state.active_step == 'convert':
+    st.success(f"✅ Ready! Click the **Convert!** button above to apply the {st.session_state.brand_choice} brand standards.")
 
 
 # --- RESTORE VARIABLES FOR THE ENGINE ---
@@ -233,6 +231,9 @@ if base_file:
 
 # --- 6. THE PRECISION ENGINE ---
 if convert_pressed and base_file and brand_choice and auto_refs:
+    # Reset active step back to brand so it doesn't stay stuck on success message after converting
+    st.session_state.active_step = 'brand'
+    
     with st.spinner(f"Applying {brand_choice} Standards..."):
         try:
             process_base = Image.open(base_file)
@@ -372,6 +373,7 @@ if convert_pressed and base_file and brand_choice and auto_refs:
 
         except Exception as e:
             st.error(f"⚠️ Error: {e}")
+
 
 # --- 7. RENDER DISPLAY & CAROUSEL ---
 if st.session_state.render_img:
