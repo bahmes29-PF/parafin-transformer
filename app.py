@@ -135,11 +135,20 @@ with title_col2:
     st.header("Brand Converter")
 
 
+# --- BUTTON CLICK CALLBACKS ---
+def go_to_upload():
+    st.session_state.active_step = 'upload'
+
+def go_to_brand():
+    st.session_state.active_step = 'brand'
+
+
 # --- 2. HORIZONTAL BUTTON WORKFLOW ---
-# Dynamic target brand logo rendering directly ABOVE the Brand Select button
+# Logo row: always rendered at fixed height to prevent layout shift causing button shake
 logo_col1, logo_col2, logo_col3 = st.columns(3)
 
 with logo_col2:
+    # Always reserve the same vertical space — show logo if available, else invisible spacer
     if st.session_state.brand_choice is not None and st.session_state.base_file is not None:
         if "City Express" in st.session_state.brand_choice:
             logo_filename = "city_express_signage.PNG"
@@ -153,24 +162,24 @@ with logo_col2:
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
                 st.image(logo_path, use_container_width=True)
+        else:
+            st.markdown("<div style='height:80px'></div>", unsafe_allow_html=True)
+    else:
+        st.markdown("<div style='height:80px'></div>", unsafe_allow_html=True)
 
 
-# The 3 Main Workflow Buttons
+# The 3 Main Workflow Buttons — use on_click callbacks to avoid st.rerun() causing shake
 b_col1, b_col2, b_col3 = st.columns(3)
 
 # Button 1: Image Upload
 type_btn1 = "primary" if st.session_state.active_step == 'upload' else "secondary"
-if b_col1.button("Image Upload", type=type_btn1, use_container_width=True):
-    st.session_state.active_step = 'upload'
-    st.rerun()
+b_col1.button("Image Upload", type=type_btn1, use_container_width=True, on_click=go_to_upload)
 b_col1.markdown("<div style='text-align: center; font-size: 12px; color: #888888; margin-top: -12px;'>Step 1</div>", unsafe_allow_html=True)
 
 # Button 2: Brand Select
 brand_disabled = st.session_state.base_file is None
 type_btn2 = "primary" if st.session_state.active_step == 'brand' else "secondary"
-if b_col2.button("Brand Select", type=type_btn2, disabled=brand_disabled, use_container_width=True):
-    st.session_state.active_step = 'brand'
-    st.rerun()
+b_col2.button("Brand Select", type=type_btn2, disabled=brand_disabled, use_container_width=True, on_click=go_to_brand)
 b_col2.markdown("<div style='text-align: center; font-size: 12px; color: #888888; margin-top: -12px;'>Step 2</div>", unsafe_allow_html=True)
 
 # Button 3: Convert!
