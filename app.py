@@ -21,7 +21,7 @@ st.markdown(f"""
     #MainMenu {{visibility: hidden;}}
     header {{visibility: hidden;}}
 
-    /* 2. Target the "Manage app" button and its container specifically */
+    /* 2. Target the "Manage app" button */
     .stAppDeployButton {{ display: none !important; }}
     div[data-testid="stStatusWidget"] {{ display: none !important; }}
     [id^="manage-app"], [class*="viewerBadge"] {{ display: none !important; }}
@@ -30,39 +30,48 @@ st.markdown(f"""
     .block-container {{ padding-top: 2rem; }}
 
     /* 4. ROCK-SOLID BUTTON STYLING */
-    /* Primary (Active/Selected) State */
-    .stButton > button[kind="primary"] {{
+    
+    /* Primary (Active) Button */
+    div[data-testid="stButton"] button[data-testid="baseButton-primary"] {{
         background-color: {parafin_blue} !important;
-        color: white !important;
         border-color: {parafin_blue} !important;
-        border-radius: 5px;
-        height: 3em;
+        border-radius: 5px !important;
+        height: 3em !important;
     }}
-    .stButton > button[kind="primary"]:hover {{
+    div[data-testid="stButton"] button[data-testid="baseButton-primary"] * {{
+        color: white !important;
+    }}
+    div[data-testid="stButton"] button[data-testid="baseButton-primary"]:hover {{
         background-color: #555975 !important; 
         border-color: #555975 !important;
     }}
     
-    /* Secondary (Inactive) & Disabled State */
-    .stButton > button[kind="secondary"], 
-    .stButton > button:disabled {{
+    /* Secondary (Inactive) Button */
+    div[data-testid="stButton"] button[data-testid="baseButton-secondary"] {{
         background-color: {grayed_out_bg} !important;
-        color: {grayed_out_text} !important;
         border-color: #E0E0E0 !important;
-        border-radius: 5px;
-        height: 3em;
+        border-radius: 5px !important;
+        height: 3em !important;
     }}
-    .stButton > button[kind="secondary"]:hover:not(:disabled) {{
-        background-color: #E8E8E8 !important;
-        color: #555555 !important;
-        border-color: #D0D0D0 !important;
+    div[data-testid="stButton"] button[data-testid="baseButton-secondary"] * {{
+        color: {grayed_out_text} !important;
+    }}
+    
+    /* Disabled Button */
+    div[data-testid="stButton"] button:disabled {{
+        background-color: {grayed_out_bg} !important;
+        border-color: #E0E0E0 !important;
+        cursor: not-allowed !important;
+    }}
+    div[data-testid="stButton"] button:disabled * {{
+        color: {grayed_out_text} !important;
     }}
     </style>
 """, unsafe_allow_html=True)
 # ---------------------------
 
 # Assets Directory
-ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+ASSETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
 
 # --- STATE MANAGEMENT INIT ---
 if "render_history" not in st.session_state: st.session_state.render_history = []
@@ -100,13 +109,15 @@ if not api_key:
 title_col1, title_col2 = st.columns([1, 6], vertical_alignment="center")
 
 with title_col1:
-    # Restored Parafin Logo
+    # Restored Parafin Logo with strict sizing to prevent disappearing
     parafin_logo_path = os.path.join(ASSETS_DIR, "PF_Logo_2023.png")
     if os.path.exists(parafin_logo_path):
-        st.image(parafin_logo_path, use_container_width=True)
+        st.image(parafin_logo_path, width=150)
+    else:
+        st.error("PF_Logo_2023.png not found in assets!") # Visible error so we know if the path fails
 
 with title_col2:
-    st.header("Brand Converter")
+    st.header("Hotel Brand Converter")
 
 st.write("") 
 
