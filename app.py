@@ -9,14 +9,30 @@ import tomllib
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
-# --- ADD THIS BLOCK HERE ---
+# Update your st.markdown block to this:
 st.markdown("""
     <style>
+    /* 1. Hide the footer and hamburger menu */
     footer {visibility: hidden;}
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
-    .stAppDeployButton {display: none;}
-    /* This part removes the white space at the top */
+
+    /* 2. Target the "Manage app" button and its container specifically */
+    .stAppDeployButton {
+        display: none !important;
+    }
+    
+    /* 3. This targets the floating toolbar container at the bottom right */
+    div[data-testid="stStatusWidget"] {
+        display: none !important;
+    }
+
+    /* 4. A catch-all for any elements with 'viewer' or 'manage' in the ID */
+    [id^="manage-app"], [class*="viewerBadge"] {
+        display: none !important;
+    }
+
+    /* 5. Clean up the top spacing */
     .block-container {
         padding-top: 2rem;
     }
