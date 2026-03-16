@@ -221,7 +221,7 @@ elif st.session_state.active_step == 'brand':
 
     if new_choice != st.session_state.brand_choice and new_choice is not None:
         st.session_state.brand_choice = new_choice
-        st.session_state.active_step = 'convert'
+        st.session_state.active_step = 'brand'
         st.rerun()
 
 elif st.session_state.active_step == 'convert':
@@ -259,7 +259,7 @@ if base_file:
 
 # --- 6. THE PRECISION ENGINE ---
 if convert_pressed and base_file and brand_choice and auto_refs:
-    st.session_state.active_step = 'brand'
+    st.session_state.active_step = 'convert'
 
     with spinner_placeholder:
         with st.spinner(f"Applying {brand_choice} Standards..."):
