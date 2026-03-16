@@ -122,6 +122,8 @@ with title_col1:
 with title_col2:
     st.header("Brand Converter")
 
+#st.write("") 
+
 
 # --- 2. HORIZONTAL BUTTON WORKFLOW ---
 # Dynamic target brand logo rendering directly ABOVE the Brand Select button
@@ -151,6 +153,7 @@ type_btn1 = "primary" if st.session_state.active_step == 'upload' else "secondar
 if b_col1.button("Image Upload", type=type_btn1, use_container_width=True):
     st.session_state.active_step = 'upload'
     st.rerun()
+b_col1.markdown("<div style='text-align: center; font-size: 12px; color: #888888; margin-top: -12px;'>Step 1</div>", unsafe_allow_html=True)
 
 # Button 2: Brand Select
 brand_disabled = st.session_state.base_file is None
@@ -158,11 +161,13 @@ type_btn2 = "primary" if st.session_state.active_step == 'brand' else "secondary
 if b_col2.button("Brand Select", type=type_btn2, disabled=brand_disabled, use_container_width=True):
     st.session_state.active_step = 'brand'
     st.rerun()
+b_col2.markdown("<div style='text-align: center; font-size: 12px; color: #888888; margin-top: -12px;'>Step 2</div>", unsafe_allow_html=True)
 
 # Button 3: Convert!
 convert_disabled = (st.session_state.base_file is None) or (st.session_state.brand_choice is None)
 type_btn3 = "primary" if st.session_state.active_step == 'convert' else "secondary"
 convert_pressed = b_col3.button("Convert!", type=type_btn3, disabled=convert_disabled, use_container_width=True)
+b_col3.markdown("<div style='text-align: center; font-size: 12px; color: #888888; margin-top: -12px;'>Step 3</div>", unsafe_allow_html=True)
 
 
 st.divider()
@@ -319,12 +324,7 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     "4. PORTE COCHERE (CANOPY) LOGIC: If a projecting drive-under canopy exists, you may apply the geometric triangle mural to the UNDERSIDE (ceiling) of the canopy, or paint the canopy fascia PT-20 Light Gray. Keep columns clean. \n"
                     "5. SIGNAGE PLACEMENT RULE: The primary 'Spark' logo MUST ONLY appear on the solid, lightest gray exterior paint (PT-20). Do NOT place the logo over the busy geometric mural or dark accents. \n"
                     "6. ROOF PRESERVATION (PT-23): The exact pitched roof or skyline must remain completely unaltered in geometry, but you may update the roof color to match the PT-23 spec if applicable. \n"
-                    "7. TRIM (PT-22): Keep architectural trim and details painted in the designated PT-22 color. \n"
-                    "8. LOGO & SIGNAGE STENCILING: \n"
-                    "   - FINALLY, identify all signage areas on the building (entrance canopies, ground-floor plaques). \n"
-                    "   - APPLY the text 'spark' from the provided asset as a precise visual stencil over all identified signage areas. \n"
-                    "   - CRITICAL: Render the letters with the *exact* lowercase formatting, font, and color seen in the 'spark_signage.png' asset. \n"
-                    "   - ENSURE the word 'spark' is strictly lowercase. Do NOT capitalize it. \n"
+                    "7. TRIM (PT-22): Keep architectural trim and details painted in the designated PT-22 color."
                     f"{rendering_logic}"
                 )
             elif "Garner" in brand_choice:
@@ -342,11 +342,7 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     "5. SIGNAGE PLACEMENT: Place a prominent white 'Garner by IHG' channel-letter "
                     "logo on the highest point of the Deep Charcoal focal tower. \n"
                     "6. LANDSCAPING & BASE: Maintain existing stone/brick bases with a 'Digital "
-                    "Power Wash'. Enhance entrance areas with crisp, focal landscaping imagery. \n"
-                    "7. LOGO & SIGNAGE STENCILING: \n"
-                    "   - FINALLY, identify all signage areas on the building. \n"
-                    "   - APPLY the text 'Garner' from the provided asset as a precise visual stencil over all identified signage areas. \n"
-                    "   - CRITICAL: Render the letters with the *exact* capitalization, font, and styling seen in the 'garner_signage.PNG' asset. \n"
+                    "Power Wash'. Enhance entrance areas with crisp, focal landscaping imagery."
                     f"{rendering_logic}"
                 )
 
@@ -369,9 +365,9 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                 "6. SIGNAGE LOCK: DO NOT add new signage. ONLY replace existing signs in their exact original locations. \n"
                 "7. ZERO-TOLERANCE CONTENT LOCKED: \n"
                 "   - IDENTIFY the exact text from the provided signage asset. \n"
-                "   - DO NOT change the capitalization of any letters. \n"
+                "   - DO NOT change the capitalization of any letters. (It must be uppercase 'CITY EXPRESS', not 'city express'). \n"
                 "   - DO NOT change the font, color, or spelling of the logo. \n"
-                "   - DO NOT make any text lowercase if it is uppercase in the reference image, and vice versa. \n"
+                "   - DO NOT make any text lowercase if it is uppercase in the reference image. \n"
                 "8. REFERENCE IMAGE IS A MANDATORY VISUAL TEMPLATE: Treat the attached logo reference image as an immutable visual stencil for any text rendering. \n"
                 "ACT AS A PRECISION SURFACE-LEVEL VISUALIZER. \n"
                 f"BRAND STANDARDS: {brand_instr} \n"
