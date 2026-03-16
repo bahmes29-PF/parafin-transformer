@@ -9,34 +9,64 @@ import tomllib
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
-st.markdown("""
+# Target all buttons for styling
+parafin_blue = "#666B8B"
+grayed_out_bg = "#F5F5F5"
+grayed_out_text = "#888888"
+
+st.markdown(f"""
     <style>
     /* 1. Hide the footer and hamburger menu */
-    footer {visibility: hidden;}
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
+    footer {{visibility: hidden;}}
+    #MainMenu {{visibility: hidden;}}
+    header {{visibility: hidden;}}
 
     /* 2. Target the "Manage app" button and its container specifically */
-    .stAppDeployButton {
+    .stAppDeployButton {{
         display: none !important;
-    }
+    }}
     
     /* 3. This targets the floating toolbar container at the bottom right */
-    div[data-testid="stStatusWidget"] {
+    div[data-testid="stStatusWidget"] {{
         display: none !important;
-    }
+    }}
 
     /* 4. A catch-all for any elements with 'viewer' or 'manage' in the ID */
-    [id^="manage-app"], [class*="viewerBadge"] {
+    [id^="manage-app"], [class*="viewerBadge"] {{
         display: none !important;
-    }
+    }}
 
     /* 5. Clean up the top spacing */
-    .block-container {
+    .block-container {{
         padding-top: 2rem;
-    }
+    }}
+
+    /* 6. Custom Button Styling */
+    /* Primary (Active/Selected) State */
+    .stButton > button[kind="primary"] {{
+        background-color: {parafin_blue} !important;
+        color: white !important;
+        border-color: {parafin_blue} !important;
+    }}
+    .stButton > button[kind="primary"]:hover {{
+        background-color: #555975 !important; /* Slightly darker on hover */
+        border-color: #555975 !important;
+    }}
+    
+    /* Secondary (Inactive) & Disabled State */
+    .stButton > button[kind="secondary"], 
+    .stButton > button:disabled {{
+        background-color: {grayed_out_bg} !important;
+        color: {grayed_out_text} !important;
+        border-color: #E0E0E0 !important;
+    }}
+    .stButton > button[kind="secondary"]:hover {{
+        background-color: #E8E8E8 !important;
+        color: #555555 !important;
+        border-color: #D0D0D0 !important;
+    }}
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 # ---------------------------
 
 # Assets Directory (Dynamic Relative Path)
@@ -75,44 +105,56 @@ if not api_key:
     st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
 
 
-# --- MAIN TITLE WITH DYNAMIC LOGO ---
-title_col1, title_col2 = st.columns([1, 10], vertical_alignment="center")
-
-with title_col1:
-    if "City Express" in st.session_state.brand_choice:
-        logo_filename = "city_express_signage.PNG"
-    elif "Spark" in st.session_state.brand_choice:
-        logo_filename = "spark_signage.png"
-    else:
-        logo_filename = "garner_signage.PNG"
-        
-    logo_path = os.path.join(ASSETS_DIR, logo_filename)
-    
-    if os.path.exists(logo_path):
-        st.image(logo_path, use_container_width=True)
-    else:
-        st.error(f"Missing: {logo_filename}")
-
-with title_col2:
-    st.header("Hotel Brand Converter")
-
+# --- MAIN TITLE ONLY (LOGO REMOVED) ---
+st.header("Hotel Brand Converter")
 st.write("") # Small visual spacer
 
 
 # --- 2. HORIZONTAL BUTTON WORKFLOW ---
+# Render the logo row first so it sits directly above the buttons
+logo_col1, logo_col2, logo_col3 = st.columns(3)
+
+with logo_col2:
+    # Only show the logo if the image has been uploaded (Step 1 complete)
+    if st.session_state.base_file is not None:
+        if "City Express" in st.session_state.brand_choice:
+            logo_filename = "city_express_signage.PNG"
+        elif "Spark" in st.session_state.brand_choice:
+            logo_filename = "spark_signage.png"
+        else:
+            logo_filename = "garner_signage.PNG"
+            
+        logo_path = os.path.join(ASSETS_DIR, logo_filename)
+        
+        if os.path.exists(logo_path):
+            # Use nested columns to center the logo perfectly above the button
+            c1, c2, c3 = st.columns([1, 2, 1])
+            with c2:
+                st.image(logo_path, use_container_width=True)
+        else:
+            st.error(f"Missing: {logo_filename}")
+
+
+# Determine button styles based on active step
+type_btn1 = "primary" if st.session_state.active_step == 'upload' else "secondary"
+type_btn2 = "primary" if st.session_state.active_step == 'brand' else "secondary"
+type_btn3 = "primary" if st.session_state.active_step == 'convert' else "secondary"
+
 b_col1, b_col2, b_col3 = st.columns(3)
 
 # Button 1: Image Upload
-if b_col1.button("Image Upload", use_container_width=True):
+if b_col1.button("Image Upload", type=type_btn1, use_container_width=True):
     st.session_state.active_step = 'upload'
+    st.rerun()
 
-# Button 2: Brand Select (Grayed out if no image uploaded)
+# Button 2: Brand Select (Disabled if no image uploaded)
 brand_disabled = st.session_state.base_file is None
-if b_col2.button("Brand Select", disabled=brand_disabled, use_container_width=True):
+if b_col2.button("Brand Select", type=type_btn2, disabled=brand_disabled, use_container_width=True):
     st.session_state.active_step = 'brand'
+    st.rerun()
 
-# Button 3: Convert (Grayed out if no image uploaded)
-convert_pressed = b_col3.button("Convert!", disabled=brand_disabled, type="primary", use_container_width=True)
+# Button 3: Convert (Disabled if no image uploaded)
+convert_pressed = b_col3.button("Convert!", type=type_btn3, disabled=brand_disabled, use_container_width=True)
 if convert_pressed:
     st.session_state.active_step = 'convert'
 
@@ -141,7 +183,7 @@ elif st.session_state.active_step == 'brand':
     
     if new_choice != st.session_state.brand_choice:
         st.session_state.brand_choice = new_choice
-        st.rerun() # Rerun to update the logo in the header instantly
+        st.rerun() # Rerun to update the logo instantly
 
 
 # --- RESTORE VARIABLES FOR THE ENGINE ---
