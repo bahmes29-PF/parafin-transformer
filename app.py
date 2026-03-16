@@ -5,15 +5,6 @@ from google.genai import types
 from PIL import Image
 import io
 import tomllib
-import base64
-
-# --- HELPER FUNCTION FOR IMAGE CSS ---
-@st.cache_data
-def get_base64_image(image_path):
-    if os.path.exists(image_path):
-        with open(image_path, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode()
-    return ""
 
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
@@ -40,52 +31,30 @@ st.markdown(f"""
 
     /* 4. Global Button Logic (Active vs Inactive) */
     /* Target the ACTIVE (Primary) button state */
-    button[kind="primary"], button[data-testid="baseButton-primary"] {{
+    .stButton > button[kind="primary"] {{
         background-color: {parafin_blue} !important;
         color: white !important;
         border-color: {parafin_blue} !important;
         border-radius: 5px;
         height: 3em;
     }}
-    button[kind="primary"]:hover, button[data-testid="baseButton-primary"]:hover {{
+    .stButton > button[kind="primary"]:hover {{
         background-color: #555975 !important;
         border-color: #555975 !important;
     }}
     
     /* Target the INACTIVE (Secondary) and DISABLED button states */
-    button[kind="secondary"], button[data-testid="baseButton-secondary"], button:disabled {{
+    .stButton > button[kind="secondary"], 
+    .stButton > button:disabled {{
         background-color: {grayed_out_bg} !important;
         color: {grayed_out_text} !important;
-        border-color: {grayed_out_bg} !important;
+        border-color: #E0E0E0 !important;
         border-radius: 5px;
         height: 3em;
     }}
-    button[kind="secondary"]:hover:not(:disabled), button[data-testid="baseButton-secondary"]:hover:not(:disabled) {{
+    .stButton > button[kind="secondary"]:hover:not(:disabled) {{
         background-color: #E8E8E8 !important;
         color: #555555 !important;
-    }}
-
-    /* 5. Brand Logo Transparency & Hover Effects */
-    .brand-logo {{
-        opacity: 0.5;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-        border-radius: 8px;
-        padding: 5px;
-        background-color: transparent;
-    }}
-    .brand-logo:hover {{
-        opacity: 1.0;
-        transform: scale(1.05);
-        cursor: pointer;
-    }}
-    .brand-logo-selected {{
-        opacity: 1.0;
-        border: 2px solid {parafin_blue};
-        border-radius: 8px;
-        padding: 5px;
-        background-color: white;
-        box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -126,7 +95,7 @@ if not api_key:
     st.error("API Key not found. Please add GOOGLE_API_KEY to Railway Variables.")
 
 
-# --- MAIN TITLE ---
+# --- MAIN TITLE ONLY (LOGO REMOVED) ---
 st.header("Hotel Brand Converter")
 st.write("") 
 
@@ -136,7 +105,8 @@ st.write("")
 logo_col1, logo_col2, logo_col3 = st.columns(3)
 
 with logo_col2:
-    if st.session_state.brand_choice is not None and st.session_state.base_file is not None:
+    # Only show the logo if a brand is selected
+    if st.session_state.brand_choice is not None:
         if "City Express" in st.session_state.brand_choice:
             logo_filename = "city_express_signage.PNG"
         elif "Spark" in st.session_state.brand_choice:
@@ -146,10 +116,10 @@ with logo_col2:
             
         logo_path = os.path.join(ASSETS_DIR, logo_filename)
         if os.path.exists(logo_path):
+            # Nested columns to center the image above the button
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
                 st.image(logo_path, use_container_width=True)
-
 
 # The 3 Main Workflow Buttons
 b_col1, b_col2, b_col3 = st.columns(3)
@@ -183,48 +153,35 @@ if st.session_state.active_step == 'upload':
     uploaded_file = st.file_uploader("Original Hotel (Structure)", type=['png', 'jpg', 'jpeg'])
     if uploaded_file is not None:
         st.session_state.base_file = uploaded_file
-        st.session_state.active_step = 'brand' 
+        # Automatically move to the brand selection step after upload
+        if st.session_state.brand_choice is None:
+            st.session_state.active_step = 'brand' 
+        else:
+            st.session_state.active_step = 'convert'
         st.rerun()
 
 elif st.session_state.active_step == 'brand':
     st.subheader("🎯 Select Target Brand")
     
-    # Render the 3 brands side-by-side using Base64 for CSS targeting
-    c1, c2, c3 = st.columns(3)
-    brands = [
-        ("City Express by Marriott", "city_express_signage.PNG", c1, "City Express"),
-        ("Spark by Hilton", "spark_signage.png", c2, "Spark"),
-        ("Garner by IHG", "garner_signage.PNG", c3, "Garner")
-    ]
+    options = ["City Express by Marriott", "Spark by Hilton", "Garner by IHG"]
     
-    for brand_name, img_file, col, short_name in brands:
-        img_path = os.path.join(ASSETS_DIR, img_file)
-        img_b64 = get_base64_image(img_path)
-        
-        # Determine styling based on current selection
-        if st.session_state.brand_choice == brand_name:
-            img_class = "brand-logo-selected"
-            btn_type = "primary" 
-        else:
-            img_class = "brand-logo" 
-            btn_type = "secondary" 
-            
-        with col:
-            if img_b64:
-                st.markdown(f'''
-                    <div style="text-align: center; margin-bottom: 10px;">
-                        <img src="data:image/png;base64,{img_b64}" class="{img_class}" style="max-width: 100%; height: 80px; object-fit: contain;">
-                    </div>
-                ''', unsafe_allow_html=True)
-                
-            # When a brand is clicked, advance the step to 'convert'
-            if st.button(short_name, key=f"btn_{short_name}", type=btn_type, use_container_width=True):
-                st.session_state.brand_choice = brand_name
-                st.session_state.active_step = 'convert' # <--- This advances the workflow
-                st.rerun()
+    # Check if we have a choice yet. If not, index is None (shows placeholder)
+    current_idx = options.index(st.session_state.brand_choice) if st.session_state.brand_choice in options else None
+    
+    # Dropdown menu to select the brand
+    new_choice = st.selectbox(
+        "Select Target Brand", 
+        options, 
+        index=current_idx,
+        placeholder="Choose a brand..."
+    )
+    
+    if new_choice != st.session_state.brand_choice and new_choice is not None:
+        st.session_state.brand_choice = new_choice
+        st.session_state.active_step = 'convert' # Advance workflow to final step
+        st.rerun()
 
 elif st.session_state.active_step == 'convert':
-    # Show a ready state so the user knows to click the blue Convert button
     st.success(f"✅ Ready! Click the **Convert!** button above to apply the {st.session_state.brand_choice} brand standards.")
 
 
@@ -401,6 +358,8 @@ if convert_pressed and base_file and brand_choice and auto_refs:
 
         except Exception as e:
             st.error(f"⚠️ Error: {e}")
+elif convert_pressed:
+    st.warning("Please upload a structure image and select a brand before converting.")
 
 # --- 7. RENDER DISPLAY & CAROUSEL ---
 if st.session_state.render_img:
