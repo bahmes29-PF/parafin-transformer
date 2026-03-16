@@ -18,6 +18,9 @@ def get_base64_image(image_path):
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
+# --- TOP-LEVEL SPINNER PLACEHOLDER ---
+spinner_placeholder = st.empty()
+
 # Parafin Platform Colors
 parafin_blue = "#666B8B"
 grayed_out_bg = "#F5F5F5"
@@ -264,7 +267,7 @@ if convert_pressed and base_file and brand_choice and auto_refs:
     st.session_state.active_step = 'brand'
     
     # 2. Tell the spinner to render INSIDE the placeholder we made above
-    with spinner_placeholder.container():
+    with spinner_placeholder: 
         with st.spinner(f"Applying {brand_choice} Standards..."):
             try:
                 process_base = Image.open(base_file)
