@@ -1,0 +1,21 @@
+[theme]
+# The primary accent color for interactive elements (buttons, sliders, etc.)
+primaryColor = "#007BFF" 
+
+# Background of the main content area
+backgroundColor = "#FFFFFF"
+
+# Background of the sidebar and secondary elements
+secondaryBackgroundColor = "#F8F9FA"
+
+# Color of the text
+textColor = "#212529"
+
+# Font family (options: "sans serif", "serif", or "monospace")
+font = "sans serif"
+
+[server]
+# This helps with mobile responsiveness and clearing the "Made with Streamlit" footer
+headless = true
+enableCORS = false
+enableXsrfProtection = false
