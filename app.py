@@ -122,7 +122,7 @@ with title_col1:
 with title_col2:
     st.header("Brand Converter")
 
-st.write("") 
+#st.write("") 
 
 
 # --- 2. HORIZONTAL BUTTON WORKFLOW ---
@@ -182,11 +182,11 @@ def process_upload():
 
 # --- 3. DYNAMIC UI PANELS ---
 if st.session_state.active_step == 'upload':
-    st.subheader("📁 Upload Structure")
+    st.subheader("📁 Image Upload")
     st.caption("📱 **Mobile Users:** If your upload fails, tap your screen's menu (••• or compass) and select **Open in Safari/Chrome**.")
     
     st.file_uploader(
-        "Original Hotel (Structure)", 
+        "Original Hotel (Existing)", 
         type=['png', 'jpg', 'jpeg'],
         key="upload_widget",
         on_change=process_upload
