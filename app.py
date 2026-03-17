@@ -518,7 +518,8 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                 # All instructions last
                 user_parts.append(
                     f"Edit the first photo above by applying these paint and signage changes only. "
-                    f"The output must be the same photo with only surface colors and signs changed. "
+                    f"The input photo is {orig_width}x{orig_height} pixels. "
+                    f"The output must be the same photo at the same {orig_width}x{orig_height} dimensions with only surface colors and signs changed. "
                     f"The camera angle, perspective, framing, horizon line, and every structural element must be "
                     f"identical to the input. Do not zoom, crop, rotate, or reframe.\n\n"
                     f"{system_instruction}"
@@ -536,24 +537,6 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                 for part in response.candidates[0].content.parts:
                     if part.inline_data:
                         raw_img = Image.open(io.BytesIO(part.inline_data.data))
-                        raw_w, raw_h = raw_img.size
-                        target_ratio = orig_width / orig_height
-                        raw_ratio = raw_w / raw_h
-
-                        # Crop the output to match the input aspect ratio before resizing
-                        if abs(raw_ratio - target_ratio) > 0.01:
-                            if raw_ratio > target_ratio:
-                                # Output is too wide — crop sides
-                                new_w = int(raw_h * target_ratio)
-                                left = (raw_w - new_w) // 2
-                                raw_img = raw_img.crop((left, 0, left + new_w, raw_h))
-                            else:
-                                # Output is too tall — crop top/bottom
-                                new_h = int(raw_w / target_ratio)
-                                top = (raw_h - new_h) // 2
-                                raw_img = raw_img.crop((0, top, raw_w, top + new_h))
-
-                        # Now resize to exact input dimensions — no stretching since ratios match
                         final_img = raw_img.resize((orig_width, orig_height), Image.Resampling.LANCZOS)
                         st.session_state.render_history.append(final_img)
                         st.session_state.render_img = final_img
