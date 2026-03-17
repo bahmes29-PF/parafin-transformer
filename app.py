@@ -333,14 +333,11 @@ if convert_pressed and base_file and brand_choice and auto_refs:
 
                 # --- PHOTOREALISTIC RENDERING PROTOCOL ---
                 rendering_logic = (
-                    "\nULTRA-PHOTOREALISTIC RENDERING PROTOCOL: \n"
-                    "1. GLOBAL ILLUMINATION & BOUNCED LIGHT: Every new material must react to the scene's light source. "
-                    "Calculated bounced light from the ground/pavement must reflect on the lower facade. \n"
-                    "2. AMBIENT OCCLUSION: Generate high-fidelity contact shadows (AO) in all corners, window reveals, "
-                    "and where the canopy meets the wall to ensure physical depth and prevent a flat look. \n"
-                    "3. MATERIAL PHYSICS: New paint must have a 'Satin Stucco' finish. It must catch specular highlights "
-                    "on sun-facing edges and show subtle texture variations. No flat or matte fills. \n"
-                    "4. LOGO ILLUMINATION: If signage is placed, render subtle drop shadows and physical mounting depth."
+                    "\nRENDERING QUALITY: \n"
+                    "- New paint must have a satin stucco finish with specular highlights on sun-facing edges. \n"
+                    "- Generate contact shadows (ambient occlusion) in all corners and window reveals. \n"
+                    "- Bounced light from the ground must reflect on the lower facade. \n"
+                    "- If signage is placed, render subtle drop shadows and physical mounting depth. \n"
                 )
 
                 # BRAND STANDARDS
@@ -459,43 +456,29 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     "4. MAJOR PROTRUSIONS: Major protrusions or large elements on the facade must be painted the Deep Navy Blue (PTW-004-SW) color palette, but they MUST REMAIN BLANK with no signage unless a sign was already there in the input image."
                 )
 
-                # GLOBAL OVERRIDE SYSTEM INSTRUCTIONS
+                # GLOBAL PROMPT
                 system_instruction = (
-                    "### STEP 1 — MANDATORY INPUT PHOTO ANALYSIS (DO THIS BEFORE ANYTHING ELSE) ###\n"
-                    "Before making ANY changes, study the input photo and record:\n"
-                    "  A. FLOOR COUNT: Count every floor exactly. This number is immutable.\n"
-                    "  B. BUILDING SILHOUETTE: Trace the exact roofline, parapet shape, and skyline profile.\n"
-                    "  C. CAMERA ANGLE & PERSPECTIVE: Note the exact viewpoint — angle, elevation, distance.\n"
-                    "  D. EXISTING STRUCTURES: List every physical element — canopies, overhangs, corridors, wings.\n"
-                    "  E. SURFACE MATERIALS: For every wall section, classify as masonry (brick/stone) or painted (stucco/EIFS/siding).\n"
-                    "  F. EXISTING SIGNAGE LOCATIONS: Mark every sign position precisely.\n"
-                    "You will use this analysis as your locked reference. Nothing in it can change.\n\n"
-                    "### STEP 2 — GEOMETRY LOCKDOWN (ABSOLUTE, NO EXCEPTIONS) ###\n"
-                    "1. YOU ARE A PAINTER ONLY. You apply new paint colors and surface finishes to the existing building. You do not move walls, add floors, change rooflines, or alter any geometry.\n"
-                    "2. FLOOR COUNT IS LOCKED: The output must have the EXACT same number of floors as counted in Step 1. Adding or removing even one floor is a critical failure.\n"
-                    "3. SILHOUETTE IS LOCKED: The building outline against the sky must be pixel-identical to the input. No new rooftop structures, parapets, or massing.\n"
-                    "4. NO NEW STRUCTURES: Do not add porte-cocheres, canopies, towers, wings, or any element not present in the input photo.\n"
-                    "5. CAMERA & PERSPECTIVE LOCKED: The viewpoint, camera angle, and perspective must match the input photo exactly.\n"
-                    "6. REFERENCE PHOTOS ARE PAINT SWATCHES ONLY: The attached brand reference images show color palettes, material finishes, and signage graphics ONLY. Do NOT copy their architecture, floor count, massing, or building shape under any circumstances.\n"
-                    "7. NO MIRRORING OR FLIPPING: Left-to-right orientation of the building and environment is locked.\n\n"
-                    "### STEP 3 — SURFACE CHANGES (PAINT & SIGNAGE ONLY) ###\n"
-                    f"Apply these brand standards to the locked geometry from Step 2:\n{brand_instr}\n\n"
-                    f"Apply signage using these rules:\n{signage_logic}\n\n"
-                    "### STEP 4 — MATERIAL RULES ###\n"
-                    "EXISTING MASONRY (brick/stone identified in Step 1E): IMMUTABLE. Do not paint, tint, or recolor. Apply Digital Pressure Wash only — remove dirt and weathering to restore natural vibrancy.\n"
-                    "PAINTED SURFACES (stucco/EIFS identified in Step 1E): Apply new brand paint color only. Do NOT change the surface material — stucco stays stucco. Do NOT add stone or brick veneer to smooth surfaces.\n\n"
-                    "QUALITY: Photorealistic architectural render matching the exact perspective and geometry of the input photo."
+                    "You are a photo retouching tool. Your only job is to repaint the surfaces of the building in the photo. "
+                    "You do not generate a new image. You do not imagine a new building. You work directly on the photo provided.\n\n"
+                    "ABSOLUTE CONSTRAINTS — these cannot be overridden by anything below:\n"
+                    "- Every pixel of geometry stays exactly where it is. Walls, windows, roofline, floors, canopies, parking lot, sky, trees, and surroundings are all frozen.\n"
+                    "- Do not add, remove, or reshape any structure. No new floors, no new canopies, no new wings.\n"
+                    "- Do not change the camera angle, perspective, or composition in any way.\n"
+                    "- The reference brand images below are color swatches and signage samples ONLY. Do not use their building shapes.\n\n"
+                    "WHAT YOU MAY CHANGE — paint and signage only:\n"
+                    f"{brand_instr}\n\n"
+                    "SIGNAGE:\n"
+                    f"{signage_logic}\n\n"
+                    "MASONRY RULE: Any surface that is brick, stone, or raw masonry in the photo must stay that exact material and color — pressure wash it clean but do not paint it or replace it with another material. "
+                    "Any surface that is smooth/stucco/painted may be repainted but must stay smooth — do not add stone or brick texture to it.\n\n"
+                    f"{rendering_logic}"
                 )
 
-                contents = [
-                    "This is the INPUT PHOTO. This is the building you must recolor. Its geometry, floor count, silhouette, camera angle, and perspective are all locked and cannot change.",
-                    process_base,
-                    system_instruction,
-                ]
+                contents = [process_base, system_instruction]
 
                 if "Spark" not in brand_choice:
                     for ref_path in auto_refs:
-                        contents.append("The following image is a BRAND REFERENCE for color and signage extraction ONLY. Do NOT copy its architecture or floor count.")
+                        contents.append("COLOR/SIGNAGE REFERENCE ONLY — do not copy this building's shape or floor count:")
                         contents.append(Image.open(ref_path))
 
                 response = client.models.generate_content(
