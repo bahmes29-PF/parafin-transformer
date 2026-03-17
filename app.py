@@ -340,9 +340,6 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                 process_base = Image.open(base_file)
                 orig_width, orig_height = process_base.size
 
-                ratio_val = orig_width / orig_height
-                chosen_ratio = "16:9" if ratio_val > 1.5 else "4:3" if ratio_val > 1.2 else "1:1"
-
                 # --- PHOTOREALISTIC RENDERING PROTOCOL ---
                 rendering_logic = (
                     "\nRENDERING QUALITY: \n"
@@ -510,7 +507,6 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     contents=contents,
                     config=types.GenerateContentConfig(
                         response_modalities=["IMAGE"],
-                        image_config=types.ImageConfig(aspect_ratio=chosen_ratio),
                         temperature=0.1
                     )
                 )
