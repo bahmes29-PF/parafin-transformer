@@ -524,9 +524,10 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                 for part in response.candidates[0].content.parts:
                     if part.inline_data:
                         raw_img = Image.open(io.BytesIO(part.inline_data.data))
-                        final_img = raw_img.resize((orig_width, orig_height), Image.Resampling.LANCZOS)
-                        st.session_state.render_history.append(final_img)
-                        st.session_state.render_img = final_img
+                        # Preserve aspect ratio — fit within original dimensions without stretching
+                        raw_img.thumbnail((orig_width, orig_height), Image.Resampling.LANCZOS)
+                        st.session_state.render_history.append(raw_img)
+                        st.session_state.render_img = raw_img
                         st.rerun()
 
             except Exception as e:
