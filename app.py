@@ -490,23 +490,36 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     f"{rendering_logic}"
                 )
 
-                contents = [process_base, system_instruction]
+                # Build the user message — image first, then all instructions
+                user_parts = []
 
-                # Always send the signage asset first — all brands need it for logo accuracy
+                # Input photo as the primary edit target
+                user_parts.append(process_base)
+
+                # Signage asset
                 if signage_ref:
-                    contents.append("This is the EXACT SIGNAGE LOGO ASSET to use. Reproduce this logo precisely — same text, same layout, same proportions, same colors, same icon position. Do not invent or modify any element of it.")
-                    contents.append(Image.open(signage_ref))
+                    user_parts.append("This is the EXACT SIGNAGE LOGO to reproduce. Same layout, proportions, colors, and icon position — do not modify it.")
+                    user_parts.append(Image.open(signage_ref))
 
-                # Brand reference photos for color/material context
+                # Brand reference photos
                 for ref_path in auto_refs:
-                    contents.append("COLOR/MATERIAL REFERENCE ONLY — do not copy this building's shape, floor count, or geometry:")
-                    contents.append(Image.open(ref_path))
+                    user_parts.append("COLOR/MATERIAL REFERENCE ONLY — do not copy this building shape or perspective:")
+                    user_parts.append(Image.open(ref_path))
+
+                # All instructions last
+                user_parts.append(
+                    f"Edit the first photo above by applying these paint and signage changes only. "
+                    f"The output must be the same photo with only surface colors and signs changed. "
+                    f"The camera angle, perspective, framing, horizon line, and every structural element must be "
+                    f"pixel-identical to the input. Do not zoom, crop, rotate, or reframe.\n\n"
+                    f"{system_instruction}"
+                )
 
                 response = client.models.generate_content(
                     model='gemini-3.1-flash-image-preview',
-                    contents=contents,
+                    contents=[{"role": "user", "parts": user_parts}],
                     config=types.GenerateContentConfig(
-                        response_modalities=["IMAGE"],
+                        response_modalities=["IMAGE", "TEXT"],
                         temperature=0.1
                     )
                 )
