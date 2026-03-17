@@ -283,12 +283,15 @@ base_file = st.session_state.base_file
 brand_choice = st.session_state.brand_choice
 
 auto_refs = []
+signage_ref = None
 if brand_choice:
     search_string = "city_express" if "City Express" in brand_choice else "spark" if "Spark" in brand_choice else "garner"
     if os.path.exists(ASSETS_DIR):
         all_files = os.listdir(ASSETS_DIR)
+
+        # Brand reference photos (non-signage, non-example)
         seen_basenames = set()
-        for f in sorted(all_files):  # sorted so .PNG wins over .jpg consistently
+        for f in sorted(all_files):
             name, ext = os.path.splitext(f)
             if (search_string in f.lower()
                     and "signage" not in f.lower()
@@ -297,6 +300,15 @@ if brand_choice:
                     and name.lower() not in seen_basenames):
                 auto_refs.append(os.path.join(ASSETS_DIR, f))
                 seen_basenames.add(name.lower())
+
+        # Signage asset — always loaded separately for all brands
+        for f in sorted(all_files):
+            name, ext = os.path.splitext(f)
+            if (search_string in f.lower()
+                    and "signage" in f.lower()
+                    and ext.lower() in ('.png', '.jpg', '.jpeg')):
+                signage_ref = os.path.join(ASSETS_DIR, f)
+                break
 
 blue_inset_pct = 30
 
@@ -396,9 +408,13 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                         "7. TRIM (PT-22): Keep architectural trim and details painted in the designated PT-22 color. \n"
                         "8. LOGO & SIGNAGE STENCILING: \n"
                         "   - FINALLY, identify all signage areas on the building (entrance canopies, ground-floor plaques). \n"
-                        "   - APPLY the complete logo lockup 'spark by Hilton' from the provided asset as a precise visual stencil over all identified signage areas. \n"
-                        "   - CRITICAL: You must include the 'by Hilton' sub-text. Render all letters with the *exact* lowercase formatting for 'spark', font, proportions, and color seen in the 'spark_signage.png' asset. \n"
-                        "   - DO NOT invent your own font. You are tracing the provided asset. \n"
+                        "   - APPLY the 'spark by Hilton' logo lockup with the following EXACT layout — do not deviate: \n"
+                        "     * The word 'spark' in bold lowercase purple letters (approx #6B3FA0). \n"
+                        "     * The words 'by Hilton' in smaller lowercase text directly below 'spark', right-aligned to it. \n"
+                        "     * A single 4-pointed star/diamond shape (the Spark icon) positioned at the TOP-LEFT corner of the logo, above and to the left of the letter 's'. It is lime yellow-green (#C8D400) in color. \n"
+                        "     * CRITICAL: The 4-pointed star appears ONLY once, at the TOP-LEFT above the 's'. There is NO star, spark, diamond, or decorative shape anywhere near the letter 'k', the right side of the word, or anywhere else in the logo. \n"
+                        "     * The logo sits on a clean light gray (PT-20) wall background with no border or box around it. \n"
+                        "   - DO NOT invent additional decorative elements. The logo is: star top-left, 'spark' text, 'by Hilton' below. That is all. \n"
                         f"{rendering_logic}"
                     )
                 elif "Garner" in brand_choice:
@@ -479,10 +495,15 @@ if convert_pressed and base_file and brand_choice and auto_refs:
 
                 contents = [process_base, system_instruction]
 
-                if "Spark" not in brand_choice:
-                    for ref_path in auto_refs:
-                        contents.append("COLOR/SIGNAGE REFERENCE ONLY — do not copy this building's shape or floor count:")
-                        contents.append(Image.open(ref_path))
+                # Always send the signage asset first — all brands need it for logo accuracy
+                if signage_ref:
+                    contents.append("This is the EXACT SIGNAGE LOGO ASSET to use. Reproduce this logo precisely — same text, same layout, same proportions, same colors, same icon position. Do not invent or modify any element of it.")
+                    contents.append(Image.open(signage_ref))
+
+                # Brand reference photos for color/material context
+                for ref_path in auto_refs:
+                    contents.append("COLOR/MATERIAL REFERENCE ONLY — do not copy this building's shape, floor count, or geometry:")
+                    contents.append(Image.open(ref_path))
 
                 response = client.models.generate_content(
                     model='gemini-3.1-flash-image-preview',
