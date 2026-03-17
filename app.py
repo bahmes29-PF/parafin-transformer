@@ -81,6 +81,18 @@ st.markdown(f"""
         color: {grayed_out_text} !important;
         border-color: #E0E0E0 !important;
     }}
+    /* 5. MOBILE: Stack image columns vertically so images display at full width */
+    @media (max-width: 768px) {{
+        [data-testid="column"] {{
+            width: 100% !important;
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+        }}
+        [data-testid="stImage"] img {{
+            width: 100% !important;
+            height: auto !important;
+        }}
+    }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -524,10 +536,10 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                 for part in response.candidates[0].content.parts:
                     if part.inline_data:
                         raw_img = Image.open(io.BytesIO(part.inline_data.data))
-                        # Preserve aspect ratio — fit within original dimensions without stretching
-                        raw_img.thumbnail((orig_width, orig_height), Image.Resampling.LANCZOS)
-                        st.session_state.render_history.append(raw_img)
-                        st.session_state.render_img = raw_img
+                        # Resize to exactly match input dimensions so both images display identically
+                        final_img = raw_img.resize((orig_width, orig_height), Image.Resampling.LANCZOS)
+                        st.session_state.render_history.append(final_img)
+                        st.session_state.render_img = final_img
                         st.rerun()
 
             except Exception as e:
