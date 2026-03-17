@@ -490,11 +490,8 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     f"{rendering_logic}"
                 )
 
-                # Build the user message — image first, then all instructions
-                user_parts = []
-
-                # Input photo as the primary edit target
-                user_parts.append(process_base)
+                # Build parts list using proper SDK types
+                user_parts = [process_base]
 
                 # Signage asset
                 if signage_ref:
@@ -511,13 +508,13 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     f"Edit the first photo above by applying these paint and signage changes only. "
                     f"The output must be the same photo with only surface colors and signs changed. "
                     f"The camera angle, perspective, framing, horizon line, and every structural element must be "
-                    f"pixel-identical to the input. Do not zoom, crop, rotate, or reframe.\n\n"
+                    f"identical to the input. Do not zoom, crop, rotate, or reframe.\n\n"
                     f"{system_instruction}"
                 )
 
                 response = client.models.generate_content(
                     model='gemini-3.1-flash-image-preview',
-                    contents=[{"role": "user", "parts": user_parts}],
+                    contents=user_parts,
                     config=types.GenerateContentConfig(
                         response_modalities=["IMAGE", "TEXT"],
                         temperature=0.1
