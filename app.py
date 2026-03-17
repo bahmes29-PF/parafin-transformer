@@ -458,19 +458,22 @@ if convert_pressed and base_file and brand_choice and auto_refs:
 
                 # GLOBAL PROMPT
                 system_instruction = (
-                    "You are a photo retouching tool. Your only job is to repaint the surfaces of the building in the photo. "
-                    "You do not generate a new image. You do not imagine a new building. You work directly on the photo provided.\n\n"
-                    "ABSOLUTE CONSTRAINTS — these cannot be overridden by anything below:\n"
-                    "- Every pixel of geometry stays exactly where it is. Walls, windows, roofline, floors, canopies, parking lot, sky, trees, and surroundings are all frozen.\n"
-                    "- Do not add, remove, or reshape any structure. No new floors, no new canopies, no new wings.\n"
-                    "- Do not change the camera angle, perspective, or composition in any way.\n"
-                    "- The reference brand images below are color swatches and signage samples ONLY. Do not use their building shapes.\n\n"
+                    "TASK: Retouch the surfaces of the exact photo provided. Do not generate a new image.\n\n"
+                    "PERSPECTIVE & COMPOSITION LOCK — highest priority, overrides everything:\n"
+                    "- The camera position, angle, focal length, and perspective in the output must be identical to the input photo.\n"
+                    "- The horizon line, vanishing points, and spatial relationships between all elements must be preserved exactly.\n"
+                    "- Every window, door, floor band, and architectural feature must appear at the same position and size relative to the frame as in the input.\n"
+                    "- The parking lot, sky, trees, and surroundings are completely frozen — do not alter them.\n\n"
+                    "GEOMETRY LOCK — nothing may be added, removed, or reshaped:\n"
+                    "- Walls, roofline, canopies, overhangs, and floor count are all frozen as they appear in the photo.\n"
+                    "- Do not add new floors, wings, towers, canopies, or any structure not visible in the input.\n"
+                    "- The reference brand images are color and signage samples only — do not use their building shapes.\n\n"
                     "WHAT YOU MAY CHANGE — paint and signage only:\n"
                     f"{brand_instr}\n\n"
                     "SIGNAGE:\n"
                     f"{signage_logic}\n\n"
-                    "MASONRY RULE: Any surface that is brick, stone, or raw masonry in the photo must stay that exact material and color — pressure wash it clean but do not paint it or replace it with another material. "
-                    "Any surface that is smooth/stucco/painted may be repainted but must stay smooth — do not add stone or brick texture to it.\n\n"
+                    "MASONRY RULE: Brick, stone, or raw masonry surfaces stay that exact material and color — pressure wash clean but do not paint or replace. "
+                    "Smooth/stucco/painted surfaces may be repainted but must stay smooth — do not add stone or brick texture.\n\n"
                     f"{rendering_logic}"
                 )
 
