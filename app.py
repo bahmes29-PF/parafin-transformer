@@ -117,11 +117,13 @@ def get_base64_image(image_path):
 # Assets Directory
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
+# Parafin Platform Colors
+parafin_blue = "#666B8B"
+grayed_out_bg = "#F5F5F5"
+grayed_out_text = "#888888"
+
 def show_auth_page():
-    parafin_blue = "#666B8B"
-    grayed_out_bg = "#F5F5F5"
-    grayed_out_text = "#888888"
-    st.markdown(f"""
+        st.markdown(f"""
         <style>
         footer {{visibility: hidden;}}
         #MainMenu {{visibility: hidden;}}
