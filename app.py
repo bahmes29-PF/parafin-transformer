@@ -18,9 +18,9 @@ SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def show_auth_page():
-    parafin_blue = "#666B8B"
-    grayed_out_bg = "#F5F5F5"
-    grayed_out_text = "#888888"
+parafin_blue = "#666B8B"
+grayed_out_bg = "#F5F5F5"
+grayed_out_text = "#888888"
     st.markdown(f"""
         <style>
         button[kind="primary"] {{
