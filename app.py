@@ -200,8 +200,8 @@ with title_col1:
 with title_col2:
     st.header("Hotel Brand Converter")
     if st.button("Sign out", key="signout"):
-    st.session_state.pop("user", None)
-    st.rerun()
+        st.session_state.pop("user", None)
+        st.rerun()
 
 # --- BUTTON CLICK CALLBACKS ---
 def go_to_upload():
