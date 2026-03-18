@@ -114,116 +114,99 @@ def get_base64_image(image_path):
     
 # --- 1. CONFIGURATION & UI SETUP ---
 
-# Parafin Platform Colors
-parafin_blue = "#666B8B"
-grayed_out_bg = "#F5F5F5"
-grayed_out_text = "#888888"
-
-st.markdown(f"""
-    <style>
-    /* 1. Hide the footer and hamburger menu */
-    footer {{visibility: hidden;}}
-    #MainMenu {{visibility: hidden;}}
-    header {{visibility: hidden;}}
-
-    /* 2. Target the "Manage app" button and its container specifically */
-    .stAppDeployButton {{ display: none !important; }}
-    div[data-testid="stStatusWidget"] {{ display: none !important; }}
-    [id^="manage-app"], [class*="viewerBadge"] {{ display: none !important; }}
-
-    /* 3. Clean up the top spacing */
-    .block-container {{ padding-top: 2rem; }}
-
-    /* 4. ROCK-SOLID BUTTON STYLING (Mobile-Proof) */
-    /* Primary (Active/Selected) State */
-    button[kind="primary"] {{
-        background-color: {parafin_blue} !important;
-        color: white !important;
-        border-color: {parafin_blue} !important;
-        border-radius: 5px !important;
-        height: 3em !important;
-        -webkit-appearance: none !important;
-        appearance: none !important;
-        opacity: 1 !important;
-        cursor: pointer !important;
-        transition: background-color 0.15s ease, border-color 0.15s ease !important;
-    }}
-    button[kind="primary"] * {{
-        color: white !important;
-    }}
-    button[kind="primary"]:hover {{
-        background-color: #7A7FA0 !important;
-        border-color: #7A7FA0 !important;
-        color: white !important;
-    }}
-    button[kind="primary"]:focus, button[kind="primary"]:active {{
-        background-color: {parafin_blue} !important;
-        border-color: {parafin_blue} !important;
-        color: white !important;
-    }}
-
-    /* Secondary (Inactive) State */
-    button[kind="secondary"] {{
-        background-color: {grayed_out_bg} !important;
-        color: {grayed_out_text} !important;
-        border-color: #E0E0E0 !important;
-        border-radius: 5px !important;
-        height: 3em !important;
-        -webkit-appearance: none !important;
-        appearance: none !important;
-        opacity: 1 !important;
-        cursor: pointer !important;
-        transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
-    }}
-    button[kind="secondary"] * {{
-        color: {grayed_out_text} !important;
-        transition: color 0.15s ease !important;
-    }}
-    button[kind="secondary"]:hover:not(:disabled) {{
-        background-color: #8A8FAA !important;
-        color: white !important;
-        border-color: #8A8FAA !important;
-    }}
-    button[kind="secondary"]:hover:not(:disabled) * {{
-        color: white !important;
-    }}
-    button[kind="secondary"]:active:not(:disabled) {{
-        background-color: {parafin_blue} !important;
-        color: white !important;
-        border-color: {parafin_blue} !important;
-    }}
-    button[kind="secondary"]:active:not(:disabled) * {{
-        color: white !important;
-    }}
-
-    /* Disabled State — no hover effect */
-    button:disabled {{
-        background-color: {grayed_out_bg} !important;
-        color: {grayed_out_text} !important;
-        border-color: #E0E0E0 !important;
-        border-radius: 5px !important;
-        height: 3em !important;
-        opacity: 1 !important;
-        cursor: not-allowed !important;
-    }}
-    /* 5. MOBILE: Stack image columns vertically so images display at full width */
-    @media (max-width: 768px) {{
-        [data-testid="column"] {{
-            width: 100% !important;
-            flex: 1 1 100% !important;
-            min-width: 100% !important;
+def show_auth_page():
+    parafin_blue = "#666B8B"
+    grayed_out_bg = "#F5F5F5"
+    grayed_out_text = "#888888"
+    st.markdown(f"""
+        <style>
+        footer {{visibility: hidden;}}
+        #MainMenu {{visibility: hidden;}}
+        header {{visibility: hidden;}}
+        .stAppDeployButton {{ display: none !important; }}
+        div[data-testid="stStatusWidget"] {{ display: none !important; }}
+        [id^="manage-app"], [class*="viewerBadge"] {{ display: none !important; }}
+        .block-container {{ padding-top: 2rem; }}
+        button[kind="primary"] {{
+            background-color: {parafin_blue} !important;
+            color: white !important;
+            border-color: {parafin_blue} !important;
+            border-radius: 5px !important;
+            height: 3em !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            opacity: 1 !important;
+            cursor: pointer !important;
+            transition: background-color 0.15s ease, border-color 0.15s ease !important;
         }}
-        [data-testid="stImage"] img {{
-            width: 100% !important;
-            height: auto !important;
+        button[kind="primary"] * {{
+            color: white !important;
         }}
-    }}
-    </style>
-""", unsafe_allow_html=True)
-
-# Assets Directory
-ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
+        button[kind="primary"]:hover {{
+            background-color: #7A7FA0 !important;
+            border-color: #7A7FA0 !important;
+            color: white !important;
+        }}
+        button[kind="primary"]:focus, button[kind="primary"]:active {{
+            background-color: {parafin_blue} !important;
+            border-color: {parafin_blue} !important;
+            color: white !important;
+        }}
+        button[kind="secondary"] {{
+            background-color: {grayed_out_bg} !important;
+            color: {grayed_out_text} !important;
+            border-color: #E0E0E0 !important;
+            border-radius: 5px !important;
+            height: 3em !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            opacity: 1 !important;
+            cursor: pointer !important;
+            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+        }}
+        button[kind="secondary"] * {{
+            color: {grayed_out_text} !important;
+            transition: color 0.15s ease !important;
+        }}
+        button[kind="secondary"]:hover:not(:disabled) {{
+            background-color: #8A8FAA !important;
+            color: white !important;
+            border-color: #8A8FAA !important;
+        }}
+        button[kind="secondary"]:hover:not(:disabled) * {{
+            color: white !important;
+        }}
+        button[kind="secondary"]:active:not(:disabled) {{
+            background-color: {parafin_blue} !important;
+            color: white !important;
+            border-color: {parafin_blue} !important;
+        }}
+        button[kind="secondary"]:active:not(:disabled) * {{
+            color: white !important;
+        }}
+        button:disabled {{
+            background-color: {grayed_out_bg} !important;
+            color: {grayed_out_text} !important;
+            border-color: #E0E0E0 !important;
+            border-radius: 5px !important;
+            height: 3em !important;
+            opacity: 1 !important;
+            cursor: not-allowed !important;
+        }}
+        @media (max-width: 768px) {{
+            [data-testid="column"] {{
+                width: 100% !important;
+                flex: 1 1 100% !important;
+                min-width: 100% !important;
+            }}
+            [data-testid="stImage"] img {{
+                width: 100% !important;
+                height: auto !important;
+            }}
+        }}
+        </style>
+    """, unsafe_allow_html=True)
+    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 # --- STATE MANAGEMENT INIT ---
 if "render_history" not in st.session_state: st.session_state.render_history = []
