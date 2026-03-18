@@ -10,7 +10,11 @@ import base64
 from supabase import create_client
 
 # --- PAGE CONFIG (must be first, called once only) ---
-st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
+st.set_page_config(
+    page_title="Parafin: Brand Converter",
+    page_icon="https://imgur.com/OFMZh1F.png",
+    layout="wide"
+)
 
 # --- GLOBAL COLORS ---
 parafin_blue = "#666B8B"
