@@ -9,13 +9,15 @@ import tomllib
 import base64
 from supabase import create_client
 
+# --- PAGE CONFIG (must be first, called once only) ---
+st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
+
 # --- AUTH GATE ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def show_auth_page():
-    st.set_page_config(page_title="Parafin: Brand Converter", layout="centered")
     ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
     parafin_logo_path = os.path.join(ASSETS_DIR, "PF_Logo_2023.png")
     _, col, _ = st.columns([1, 2, 1])
@@ -66,6 +68,12 @@ def show_auth_page():
                 else:
                     st.warning("Please enter your email and password.")
 
+if "user" not in st.session_state:
+    show_auth_page()
+    st.stop()
+
+# --- HELPER FUNCTION FOR IMAGE CSS ---
+
 # --- HELPER FUNCTION FOR IMAGE CSS ---
 @st.cache_data
 def get_base64_image(image_path):
@@ -75,7 +83,6 @@ def get_base64_image(image_path):
     return ""
     
 # --- 1. CONFIGURATION & UI SETUP ---
-st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
 # Parafin Platform Colors
 parafin_blue = "#666B8B"
