@@ -114,6 +114,9 @@ def get_base64_image(image_path):
     
 # --- 1. CONFIGURATION & UI SETUP ---
 
+# Assets Directory
+ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+
 def show_auth_page():
     parafin_blue = "#666B8B"
     grayed_out_bg = "#F5F5F5"
