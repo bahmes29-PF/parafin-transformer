@@ -25,6 +25,61 @@ def show_auth_page():
         st.title("Hotel Brand Converter")
         st.caption("Sign in to access the tool — it's free!")
         st.divider()
+        # --- DEMO SLIDESHOW ---
+demo_dir = os.path.join(os.path.dirname(__file__), "assets", "demo")
+if os.path.exists(demo_dir):
+    # Find all before/after pairs
+    pairs = []
+    files = sorted(os.listdir(demo_dir))
+    bases = [f for f in files if not f[:-4].endswith('a') and f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+    for base in bases:
+        name, ext = os.path.splitext(base)
+        after_file = name + 'a' + ext
+        if after_file in files:
+            before_path = os.path.join(demo_dir, base)
+            after_path = os.path.join(demo_dir, after_file)
+            with open(before_path, "rb") as f:
+                before_b64 = base64.b64encode(f.read()).decode()
+            with open(after_path, "rb") as f:
+                after_b64 = base64.b64encode(f.read()).decode()
+            pairs.append((before_b64, after_b64, ext.replace('.', '')))
+
+    if pairs:
+        # Build keyframes for all images
+        num_images = len(pairs) * 2  # before + after for each pair
+        duration = num_images * 2.5  # 2.5 seconds per image
+        pct_per = 100 / num_images
+        
+        # Build the image list and keyframe stops
+        all_images = []
+        for before_b64, after_b64, ext in pairs:
+            mime = "jpeg" if ext in ["jpg", "jpeg"] else "png"
+            all_images.append(f"data:image/{mime};base64,{before_b64}")
+            all_images.append(f"data:image/{mime};base64,{after_b64}")
+
+        images_js = str(all_images).replace("'", '"')
+
+        st.markdown(f"""
+        <div style="position:relative; width:100%; padding-bottom:56.25%; overflow:hidden; border-radius:10px; margin-bottom:16px;">
+            <img id="slideshow-img" src="{all_images[0]}" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; border-radius:10px; transition: opacity 1s ease-in-out;"/>
+        </div>
+        <p style="text-align:center; font-size:11px; color:#888; margin-top:-12px; margin-bottom:16px;">Brand conversion examples</p>
+        <script>
+        (function() {{
+            const images = {images_js};
+            let current = 0;
+            const img = document.getElementById('slideshow-img');
+            setInterval(function() {{
+                img.style.opacity = 0;
+                setTimeout(function() {{
+                    current = (current + 1) % images.length;
+                    img.src = images[current];
+                    img.style.opacity = 1;
+                }}, 1000);
+            }}, 3000);
+        }})();
+        </script>
+        """, unsafe_allow_html=True)
         tab1, tab2 = st.tabs(["Sign In", "Create Account"])
         with tab1:
             email = st.text_input("Email", key="signup_email")
@@ -62,7 +117,6 @@ if "user" not in st.session_state:
     show_auth_page()
     st.stop()
 
-# --- HELPER FUNCTION FOR IMAGE CSS ---
 # --- HELPER FUNCTION FOR IMAGE CSS ---
 @st.cache_data
 def get_base64_image(image_path):
