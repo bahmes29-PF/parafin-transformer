@@ -7,8 +7,60 @@ from PIL import Image
 import io
 import tomllib
 import base64
+from supabase import create_client
 
+# --- AUTH GATE ---
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+def show_auth_page():
+    st.set_page_config(page_title="Parafin: Brand Converter", layout="centered")
+    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+    parafin_logo_path = os.path.join(ASSETS_DIR, "PF_Logo_2023.png")
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        if os.path.exists(parafin_logo_path):
+            st.image(parafin_logo_path, width=120)
+        st.title("Brand Converter")
+        st.caption("Sign in to access the tool — it's free!")
+        st.divider()
+        tab1, tab2 = st.tabs(["Create Account", "Sign In"])
+        with tab1:
+            email = st.text_input("Email", key="signup_email")
+            password = st.text_input("Password", type="password", key="signup_pass", help="At least 6 characters")
+            if st.button("Create Free Account", use_container_width=True, type="primary"):
+                if email and password:
+                    try:
+                        res = supabase.auth.sign_up({"email": email, "password": password})
+                        if res.user:
+                            st.success("✅ Account created! Check your email to confirm, then sign in.")
+                        else:
+                            st.error("Something went wrong. Try again.")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+                else:
+                    st.warning("Please enter your email and password.")
+        with tab2:
+            email = st.text_input("Email", key="login_email")
+            password = st.text_input("Password", type="password", key="login_pass")
+            if st.button("Sign In", use_container_width=True, type="primary"):
+                if email and password:
+                    try:
+                        res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+                        if res.user:
+                            st.session_state["user"] = res.user
+                            st.rerun()
+                        else:
+                            st.error("Invalid email or password.")
+                    except Exception as e:
+                        st.error(f"Sign in failed: {e}")
+                else:
+                    st.warning("Please enter your email and password.")
+
+if "user" not in st.session_state:
+    show_auth_page()
+    st.stop()
 # --- HELPER FUNCTION FOR IMAGE CSS ---
 @st.cache_data
 def get_base64_image(image_path):
@@ -177,8 +229,10 @@ with title_col1:
     else:
         st.error("PF_Logo_2023.png not found in assets!")
 
-with title_col2:
-    st.header("Brand Converter")
+st.header("Brand Converter")
+    if st.button("Sign out", key="signout"):
+        del st.session_state["user"]
+        st.rerun()
 
 
 # --- BUTTON CLICK CALLBACKS ---
