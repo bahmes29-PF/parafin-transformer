@@ -22,10 +22,10 @@ def show_auth_page():
     with col:
         if os.path.exists(parafin_logo_path):
             st.image(parafin_logo_path, width=120)
-        st.title("Brand Converter")
+        st.title("Hotel Brand Converter")
         st.caption("Sign in to access the tool — it's free!")
         st.divider()
-        tab1, tab2 = st.tabs(["Create Account", "Sign In"])
+        tab1, tab2 = st.tabs(["Sign In", "Create Account"])
         with tab1:
             email = st.text_input("Email", key="signup_email")
             password = st.text_input("Password", type="password", key="signup_pass", help="At least 6 characters")
