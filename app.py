@@ -18,6 +18,38 @@ SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def show_auth_page():
+    parafin_blue = "#666B8B"
+    grayed_out_bg = "#F5F5F5"
+    grayed_out_text = "#888888"
+    st.markdown(f"""
+        <style>
+        button[kind="primary"] {{
+            background-color: {parafin_blue} !important;
+            color: white !important;
+            border-color: {parafin_blue} !important;
+            border-radius: 5px !important;
+            height: 3em !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            opacity: 1 !important;
+            cursor: pointer !important;
+            transition: background-color 0.15s ease, border-color 0.15s ease !important;
+        }}
+        button[kind="primary"] * {{
+            color: white !important;
+        }}
+        button[kind="primary"]:hover {{
+            background-color: #7A7FA0 !important;
+            border-color: #7A7FA0 !important;
+            color: white !important;
+        }}
+        button[kind="primary"]:focus, button[kind="primary"]:active {{
+            background-color: {parafin_blue} !important;
+            border-color: {parafin_blue} !important;
+            color: white !important;
+        }}
+        </style>
+    """, unsafe_allow_html=True)
     ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
     parafin_logo_path = os.path.join(ASSETS_DIR, "PF_Logo_2023.png")
     _, col, _ = st.columns([1, 2, 1])
@@ -71,8 +103,6 @@ def show_auth_page():
 if "user" not in st.session_state:
     show_auth_page()
     st.stop()
-
-# --- HELPER FUNCTION FOR IMAGE CSS ---
 
 # --- HELPER FUNCTION FOR IMAGE CSS ---
 @st.cache_data
