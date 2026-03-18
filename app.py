@@ -7,29 +7,12 @@ from PIL import Image
 import io
 import tomllib
 import base64
-#from supabase import create_client
-
-import httpx
+from supabase import create_client
 
 # --- AUTH GATE ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
-
-def supabase_signup(email, password):
-    res = httpx.post(
-        f"{SUPABASE_URL}/auth/v1/signup",
-        headers={"apikey": SUPABASE_KEY, "Content-Type": "application/json"},
-        json={"email": email, "password": password}
-    )
-    return res.json()
-
-def supabase_login(email, password):
-    res = httpx.post(
-        f"{SUPABASE_URL}/auth/v1/token?grant_type=password",
-        headers={"apikey": SUPABASE_KEY, "Content-Type": "application/json"},
-        json={"email": email, "password": password}
-    )
-    return res.json()
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def show_auth_page():
     st.set_page_config(page_title="Parafin: Brand Converter", layout="centered")
@@ -49,11 +32,11 @@ def show_auth_page():
             if st.button("Create Free Account", use_container_width=True, type="primary"):
                 if email and password:
                     try:
-                        res = supabase_signup(email, password)
-                        if res.get("id") or res.get("email"):
+                        res = supabase.auth.sign_up({"email": email, "password": password})
+                        if res.user:
                             st.success("✅ Account created! Check your email to confirm, then sign in.")
                         else:
-                            st.error(res.get("msg") or res.get("message") or "Something went wrong.")
+                            st.error("Something went wrong. Try again.")
                     except Exception as e:
                         st.error(f"Error: {e}")
                 else:
@@ -64,12 +47,12 @@ def show_auth_page():
             if st.button("Sign In", use_container_width=True, type="primary"):
                 if email and password:
                     try:
-                        res = supabase_login(email, password)
-                        if res.get("access_token"):
-                            st.session_state["user"] = res.get("user") or {"email": email}
+                        res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+                        if res.user:
+                            st.session_state["user"] = res.user
                             st.rerun()
                         else:
-                            st.error(res.get("msg") or res.get("message") or "Invalid email or password.")
+                            st.error("Invalid email or password.")
                     except Exception as e:
                         st.error(f"Sign in failed: {e}")
                 else:
@@ -78,6 +61,8 @@ def show_auth_page():
 if "user" not in st.session_state:
     show_auth_page()
     st.stop()
+
+# --- HELPER FUNCTION FOR IMAGE CSS ---
 # --- HELPER FUNCTION FOR IMAGE CSS ---
 @st.cache_data
 def get_base64_image(image_path):
