@@ -7,7 +7,7 @@ from PIL import Image
 import io
 import tomllib
 import base64
-from supabase import create_client
+#from supabase import create_client
 
 import httpx
 
