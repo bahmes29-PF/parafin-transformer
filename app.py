@@ -17,12 +17,20 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def show_auth_page():
 parafin_blue = "#666B8B"
 grayed_out_bg = "#F5F5F5"
 grayed_out_text = "#888888"
+
+def show_auth_page():
     st.markdown(f"""
         <style>
+        footer {{visibility: hidden;}}
+        #MainMenu {{visibility: hidden;}}
+        header {{visibility: hidden;}}
+        .stAppDeployButton {{ display: none !important; }}
+        div[data-testid="stStatusWidget"] {{ display: none !important; }}
+        [id^="manage-app"], [class*="viewerBadge"] {{ display: none !important; }}
+        .block-container {{ padding-top: 2rem; }}
         button[kind="primary"] {{
             background-color: {parafin_blue} !important;
             color: white !important;
@@ -48,6 +56,58 @@ grayed_out_text = "#888888"
             border-color: {parafin_blue} !important;
             color: white !important;
         }}
+        button[kind="secondary"] {{
+            background-color: {grayed_out_bg} !important;
+            color: {grayed_out_text} !important;
+            border-color: #E0E0E0 !important;
+            border-radius: 5px !important;
+            height: 3em !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            opacity: 1 !important;
+            cursor: pointer !important;
+            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+        }}
+        button[kind="secondary"] * {{
+            color: {grayed_out_text} !important;
+            transition: color 0.15s ease !important;
+        }}
+        button[kind="secondary"]:hover:not(:disabled) {{
+            background-color: #8A8FAA !important;
+            color: white !important;
+            border-color: #8A8FAA !important;
+        }}
+        button[kind="secondary"]:hover:not(:disabled) * {{
+            color: white !important;
+        }}
+        button[kind="secondary"]:active:not(:disabled) {{
+            background-color: {parafin_blue} !important;
+            color: white !important;
+            border-color: {parafin_blue} !important;
+        }}
+        button[kind="secondary"]:active:not(:disabled) * {{
+            color: white !important;
+        }}
+        button:disabled {{
+            background-color: {grayed_out_bg} !important;
+            color: {grayed_out_text} !important;
+            border-color: #E0E0E0 !important;
+            border-radius: 5px !important;
+            height: 3em !important;
+            opacity: 1 !important;
+            cursor: not-allowed !important;
+        }}
+        @media (max-width: 768px) {{
+            [data-testid="column"] {{
+                width: 100% !important;
+                flex: 1 1 100% !important;
+                min-width: 100% !important;
+            }}
+            [data-testid="stImage"] img {{
+                width: 100% !important;
+                height: auto !important;
+            }}
+        }}
         </style>
     """, unsafe_allow_html=True)
     ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
@@ -59,12 +119,10 @@ grayed_out_text = "#888888"
         st.title("Hotel Brand Converter")
         st.caption("Sign in to access the tool — it's free!")
         st.divider()
-
         gif_path = os.path.join(os.path.dirname(__file__), "assets", "demo", "demo.gif")
         if os.path.exists(gif_path):
             st.image(gif_path, use_container_width=True)
             st.markdown("<div style='margin-bottom:16px'></div>", unsafe_allow_html=True)
-
         tab2, tab1 = st.tabs(["Sign In", "Create Account"])
         with tab1:
             email = st.text_input("Email", key="signup_email")
