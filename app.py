@@ -135,7 +135,7 @@ def show_auth_page():
                         if res.user and res.user.identities and len(res.user.identities) == 0:
                             st.error("An account with this email already exists. Please sign in instead.")
                         elif res.user:
-                            st.success("✅ Account created! Check your email to confirm, then sign in.")
+                            st.success(f"✅ Account created for {email}! You can now sign in.")
                         else:
                             st.error("Something went wrong. Try again.")
                     except Exception as e:
