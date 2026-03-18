@@ -198,10 +198,10 @@ with title_col1:
         st.error("PF_Logo_2023.png not found in assets!")
 
 with title_col2:
-    st.header("Brand Converter")
+    st.header("Hotel Brand Converter")
     if st.button("Sign out", key="signout"):
-        del st.session_state["user"]
-        st.rerun()
+    st.session_state.pop("user", None)
+    st.rerun()
 
 # --- BUTTON CLICK CALLBACKS ---
 def go_to_upload():
