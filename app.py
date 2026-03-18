@@ -26,89 +26,9 @@ def show_auth_page():
         st.caption("Sign in to access the tool — it's free!")
         st.divider()
         
-# --- DEMO SLIDESHOW ---
-demo_dir = os.path.join(os.path.dirname(__file__), "assets", "demo")
-if os.path.exists(demo_dir):
-    pairs = []
-    files = sorted(os.listdir(demo_dir))
-    bases = [f for f in files if not os.path.splitext(f)[0].endswith('a')
-             and f.lower().endswith(('.jpg', '.jpeg', '.png'))]
-    for base in bases:
-        name, ext = os.path.splitext(base)
-        after_file = name + 'a' + ext
-        if after_file in files:
-            pairs.append(os.path.join(demo_dir, base))
-            pairs.append(os.path.join(demo_dir, after_file))
-
-    if pairs:
-        if "slide_index" not in st.session_state:
-            st.session_state.slide_index = 0
-        
-        current_image = pairs[st.session_state.slide_index]
-        label = "Before" if not os.path.splitext(current_image)[0].endswith('a') else "After"
-        st.image(current_image, use_container_width=True, caption=f"{label} — Brand conversion example")
-        
-        if st.button("Next →", use_container_width=True):
-            st.session_state.slide_index = (st.session_state.slide_index + 1) % len(pairs)
-            st.rerun()
-
-        st.markdown(f"""
-        <div style="position:relative; width:100%; padding-bottom:56.25%; overflow:hidden; border-radius:10px; margin-bottom:16px;">
-            <img id="slideshow-img" src="{all_images[0]}" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; border-radius:10px; transition: opacity 1s ease-in-out;"/>
-        </div>
-        <p style="text-align:center; font-size:11px; color:#888; margin-top:-12px; margin-bottom:16px;">Brand conversion examples</p>
-        <script>
-        (function() {{
-            const images = {images_js};
-            let current = 0;
-            const img = document.getElementById('slideshow-img');
-            setInterval(function() {{
-                img.style.opacity = 0;
-                setTimeout(function() {{
-                    current = (current + 1) % images.length;
-                    img.src = images[current];
-                    img.style.opacity = 1;
-                }}, 1000);
-            }}, 3000);
-        }})();
-        </script>
-        """, unsafe_allow_html=True)
-        tab1, tab2 = st.tabs(["Sign In", "Create Account"])
-        with tab1:
-            email = st.text_input("Email", key="signup_email")
-            password = st.text_input("Password", type="password", key="signup_pass", help="At least 6 characters")
-            if st.button("Create Free Account", use_container_width=True, type="primary"):
-                if email and password:
-                    try:
-                        res = supabase.auth.sign_up({"email": email, "password": password})
-                        if res.user:
-                            st.success("✅ Account created! Check your email to confirm, then sign in.")
-                        else:
-                            st.error("Something went wrong. Try again.")
-                    except Exception as e:
-                        st.error(f"Error: {e}")
-                else:
-                    st.warning("Please enter your email and password.")
-        with tab2:
-            email = st.text_input("Email", key="login_email")
-            password = st.text_input("Password", type="password", key="login_pass")
-            if st.button("Sign In", use_container_width=True, type="primary"):
-                if email and password:
-                    try:
-                        res = supabase.auth.sign_in_with_password({"email": email, "password": password})
-                        if res.user:
-                            st.session_state["user"] = res.user
-                            st.rerun()
-                        else:
-                            st.error("Invalid email or password.")
-                    except Exception as e:
-                        st.error(f"Sign in failed: {e}")
-                else:
-                    st.warning("Please enter your email and password.")
-
-if "user" not in st.session_state:
-    show_auth_page()
-    st.stop()
+gif_path = os.path.join(os.path.dirname(__file__), "assets", "demo", "demo.gif")
+if os.path.exists(gif_path):
+    st.image(gif_path, use_container_width=True)
 
 # --- HELPER FUNCTION FOR IMAGE CSS ---
 @st.cache_data
@@ -117,8 +37,7 @@ def get_base64_image(image_path):
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode()
     return ""
-
-
+    
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
