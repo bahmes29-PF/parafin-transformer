@@ -229,11 +229,11 @@ with title_col1:
     else:
         st.error("PF_Logo_2023.png not found in assets!")
 
-st.header("Brand Converter")
+with title_col2:
+    st.header("Brand Converter")
     if st.button("Sign out", key="signout"):
         del st.session_state["user"]
         st.rerun()
-
 
 # --- BUTTON CLICK CALLBACKS ---
 def go_to_upload():
