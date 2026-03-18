@@ -25,39 +25,32 @@ def show_auth_page():
         st.title("Hotel Brand Converter")
         st.caption("Sign in to access the tool — it's free!")
         st.divider()
-        # --- DEMO SLIDESHOW ---
+        
+# --- DEMO SLIDESHOW ---
 demo_dir = os.path.join(os.path.dirname(__file__), "assets", "demo")
 if os.path.exists(demo_dir):
-    # Find all before/after pairs
     pairs = []
     files = sorted(os.listdir(demo_dir))
-    bases = [f for f in files if not f[:-4].endswith('a') and f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+    bases = [f for f in files if not os.path.splitext(f)[0].endswith('a')
+             and f.lower().endswith(('.jpg', '.jpeg', '.png'))]
     for base in bases:
         name, ext = os.path.splitext(base)
         after_file = name + 'a' + ext
         if after_file in files:
-            before_path = os.path.join(demo_dir, base)
-            after_path = os.path.join(demo_dir, after_file)
-            with open(before_path, "rb") as f:
-                before_b64 = base64.b64encode(f.read()).decode()
-            with open(after_path, "rb") as f:
-                after_b64 = base64.b64encode(f.read()).decode()
-            pairs.append((before_b64, after_b64, ext.replace('.', '')))
+            pairs.append(os.path.join(demo_dir, base))
+            pairs.append(os.path.join(demo_dir, after_file))
 
     if pairs:
-        # Build keyframes for all images
-        num_images = len(pairs) * 2  # before + after for each pair
-        duration = num_images * 2.5  # 2.5 seconds per image
-        pct_per = 100 / num_images
+        if "slide_index" not in st.session_state:
+            st.session_state.slide_index = 0
         
-        # Build the image list and keyframe stops
-        all_images = []
-        for before_b64, after_b64, ext in pairs:
-            mime = "jpeg" if ext in ["jpg", "jpeg"] else "png"
-            all_images.append(f"data:image/{mime};base64,{before_b64}")
-            all_images.append(f"data:image/{mime};base64,{after_b64}")
-
-        images_js = str(all_images).replace("'", '"')
+        current_image = pairs[st.session_state.slide_index]
+        label = "Before" if not os.path.splitext(current_image)[0].endswith('a') else "After"
+        st.image(current_image, use_container_width=True, caption=f"{label} — Brand conversion example")
+        
+        if st.button("Next →", use_container_width=True):
+            st.session_state.slide_index = (st.session_state.slide_index + 1) % len(pairs)
+            st.rerun()
 
         st.markdown(f"""
         <div style="position:relative; width:100%; padding-bottom:56.25%; overflow:hidden; border-radius:10px; margin-bottom:16px;">
