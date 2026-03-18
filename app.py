@@ -12,14 +12,15 @@ from supabase import create_client
 # --- PAGE CONFIG (must be first, called once only) ---
 st.set_page_config(page_title="Parafin: Brand Converter", layout="wide")
 
+# --- GLOBAL COLORS ---
+parafin_blue = "#666B8B"
+grayed_out_bg = "#F5F5F5"
+grayed_out_text = "#888888"
+
 # --- AUTH GATE ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-parafin_blue = "#666B8B"
-grayed_out_bg = "#F5F5F5"
-grayed_out_text = "#888888"
 
 def show_auth_page():
     st.markdown(f"""
@@ -169,106 +170,99 @@ def get_base64_image(image_path):
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode()
     return ""
-    
+
 # --- 1. CONFIGURATION & UI SETUP ---
-# Assets Directory
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
-# Parafin Platform Colors
-parafin_blue = "#666B8B"
-grayed_out_bg = "#F5F5F5"
-grayed_out_text = "#888888"
+st.markdown(f"""
+    <style>
+    footer {{visibility: hidden;}}
+    #MainMenu {{visibility: hidden;}}
+    header {{visibility: hidden;}}
+    .stAppDeployButton {{ display: none !important; }}
+    div[data-testid="stStatusWidget"] {{ display: none !important; }}
+    [id^="manage-app"], [class*="viewerBadge"] {{ display: none !important; }}
+    .block-container {{ padding-top: 2rem; }}
+    button[kind="primary"] {{
+        background-color: {parafin_blue} !important;
+        color: white !important;
+        border-color: {parafin_blue} !important;
+        border-radius: 5px !important;
+        height: 3em !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        opacity: 1 !important;
+        cursor: pointer !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease !important;
+    }}
+    button[kind="primary"] * {{
+        color: white !important;
+    }}
+    button[kind="primary"]:hover {{
+        background-color: #7A7FA0 !important;
+        border-color: #7A7FA0 !important;
+        color: white !important;
+    }}
+    button[kind="primary"]:focus, button[kind="primary"]:active {{
+        background-color: {parafin_blue} !important;
+        border-color: {parafin_blue} !important;
+        color: white !important;
+    }}
+    button[kind="secondary"] {{
+        background-color: {grayed_out_bg} !important;
+        color: {grayed_out_text} !important;
+        border-color: #E0E0E0 !important;
+        border-radius: 5px !important;
+        height: 3em !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        opacity: 1 !important;
+        cursor: pointer !important;
+        transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+    }}
+    button[kind="secondary"] * {{
+        color: {grayed_out_text} !important;
+        transition: color 0.15s ease !important;
+    }}
+    button[kind="secondary"]:hover:not(:disabled) {{
+        background-color: #8A8FAA !important;
+        color: white !important;
+        border-color: #8A8FAA !important;
+    }}
+    button[kind="secondary"]:hover:not(:disabled) * {{
+        color: white !important;
+    }}
+    button[kind="secondary"]:active:not(:disabled) {{
+        background-color: {parafin_blue} !important;
+        color: white !important;
+        border-color: {parafin_blue} !important;
+    }}
+    button[kind="secondary"]:active:not(:disabled) * {{
+        color: white !important;
+    }}
+    button:disabled {{
+        background-color: {grayed_out_bg} !important;
+        color: {grayed_out_text} !important;
+        border-color: #E0E0E0 !important;
+        border-radius: 5px !important;
+        height: 3em !important;
+        opacity: 1 !important;
+        cursor: not-allowed !important;
+    }}
+    @media (max-width: 768px) {{
+        [data-testid="column"] {{
+            width: 100% !important;
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+        }}
+        [data-testid="stImage"] img {{
+            width: 100% !important;
+            height: auto !important;
+        }}
+    }}
+    </style>
+""", unsafe_allow_html=True)
 
-def show_auth_page():
-        st.markdown(f"""
-        <style>
-        footer {{visibility: hidden;}}
-        #MainMenu {{visibility: hidden;}}
-        header {{visibility: hidden;}}
-        .stAppDeployButton {{ display: none !important; }}
-        div[data-testid="stStatusWidget"] {{ display: none !important; }}
-        [id^="manage-app"], [class*="viewerBadge"] {{ display: none !important; }}
-        .block-container {{ padding-top: 2rem; }}
-        button[kind="primary"] {{
-            background-color: {parafin_blue} !important;
-            color: white !important;
-            border-color: {parafin_blue} !important;
-            border-radius: 5px !important;
-            height: 3em !important;
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            opacity: 1 !important;
-            cursor: pointer !important;
-            transition: background-color 0.15s ease, border-color 0.15s ease !important;
-        }}
-        button[kind="primary"] * {{
-            color: white !important;
-        }}
-        button[kind="primary"]:hover {{
-            background-color: #7A7FA0 !important;
-            border-color: #7A7FA0 !important;
-            color: white !important;
-        }}
-        button[kind="primary"]:focus, button[kind="primary"]:active {{
-            background-color: {parafin_blue} !important;
-            border-color: {parafin_blue} !important;
-            color: white !important;
-        }}
-        button[kind="secondary"] {{
-            background-color: {grayed_out_bg} !important;
-            color: {grayed_out_text} !important;
-            border-color: #E0E0E0 !important;
-            border-radius: 5px !important;
-            height: 3em !important;
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            opacity: 1 !important;
-            cursor: pointer !important;
-            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
-        }}
-        button[kind="secondary"] * {{
-            color: {grayed_out_text} !important;
-            transition: color 0.15s ease !important;
-        }}
-        button[kind="secondary"]:hover:not(:disabled) {{
-            background-color: #8A8FAA !important;
-            color: white !important;
-            border-color: #8A8FAA !important;
-        }}
-        button[kind="secondary"]:hover:not(:disabled) * {{
-            color: white !important;
-        }}
-        button[kind="secondary"]:active:not(:disabled) {{
-            background-color: {parafin_blue} !important;
-            color: white !important;
-            border-color: {parafin_blue} !important;
-        }}
-        button[kind="secondary"]:active:not(:disabled) * {{
-            color: white !important;
-        }}
-        button:disabled {{
-            background-color: {grayed_out_bg} !important;
-            color: {grayed_out_text} !important;
-            border-color: #E0E0E0 !important;
-            border-radius: 5px !important;
-            height: 3em !important;
-            opacity: 1 !important;
-            cursor: not-allowed !important;
-        }}
-        @media (max-width: 768px) {{
-            [data-testid="column"] {{
-                width: 100% !important;
-                flex: 1 1 100% !important;
-                min-width: 100% !important;
-            }}
-            [data-testid="stImage"] img {{
-                width: 100% !important;
-                height: auto !important;
-            }}
-        }}
-        </style>
-    """, unsafe_allow_html=True)
-    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 # --- STATE MANAGEMENT INIT ---
 if "render_history" not in st.session_state: st.session_state.render_history = []
@@ -330,11 +324,9 @@ def go_to_brand():
 
 
 # --- 2. HORIZONTAL BUTTON WORKFLOW ---
-# Logo row: always rendered at fixed height to prevent layout shift causing button shake
 logo_col1, logo_col2, logo_col3 = st.columns(3)
 
 with logo_col2:
-    # Always reserve the same vertical space — show logo if available, else invisible spacer
     if st.session_state.brand_choice is not None and st.session_state.base_file is not None:
         if "City Express" in st.session_state.brand_choice:
             logo_filename = "city_express_signage.PNG"
@@ -354,21 +346,17 @@ with logo_col2:
         st.markdown("<div style='height:80px'></div>", unsafe_allow_html=True)
 
 
-# The 3 Main Workflow Buttons — use on_click callbacks to avoid st.rerun() causing shake
 b_col1, b_col2, b_col3 = st.columns(3)
 
-# Button 1: Image Upload
 type_btn1 = "primary" if st.session_state.active_step == 'upload' else "secondary"
 b_col1.button("Image Upload", type=type_btn1, use_container_width=True, on_click=go_to_upload)
 b_col1.markdown("<div style='text-align: center; font-size: 12px; color: #888888; margin-top: -12px;'>Step 1</div>", unsafe_allow_html=True)
 
-# Button 2: Brand Select
 brand_disabled = st.session_state.base_file is None
 type_btn2 = "primary" if st.session_state.active_step == 'brand' else "secondary"
 b_col2.button("Brand Select", type=type_btn2, disabled=brand_disabled, use_container_width=True, on_click=go_to_brand)
 b_col2.markdown("<div style='text-align: center; font-size: 12px; color: #888888; margin-top: -12px;'>Step 2</div>", unsafe_allow_html=True)
 
-# Button 3: Convert!
 convert_disabled = (st.session_state.base_file is None) or (st.session_state.brand_choice is None)
 type_btn3 = "primary" if st.session_state.active_step == 'convert' else "secondary"
 convert_pressed = b_col3.button("Convert!", type=type_btn3, disabled=convert_disabled, use_container_width=True)
@@ -380,7 +368,6 @@ st.divider()
 
 # --- CALLBACK FUNCTIONS ---
 def process_upload():
-    """Fires after file is 100% uploaded — updates state before render cycle"""
     if st.session_state.upload_widget is not None:
         st.session_state.base_file = st.session_state.upload_widget
         st.session_state.is_example = False
@@ -390,7 +377,6 @@ def process_upload():
             st.session_state.active_step = 'convert'
 
 def use_example():
-    """Picks a random example image from assets — finds any file named example_XX regardless of number or case"""
     candidates = []
     if os.path.exists(ASSETS_DIR):
         for f in os.listdir(ASSETS_DIR):
@@ -407,7 +393,6 @@ def use_example():
             st.session_state.active_step = 'convert'
 
 def process_brand_change():
-    """Fires on selectbox change — move to 'convert' step so selectbox unmounts, preventing layout shake"""
     new_choice = st.session_state.brand_select_widget
     if new_choice is not None:
         st.session_state.brand_choice = new_choice
@@ -426,7 +411,6 @@ if st.session_state.active_step == 'upload':
         on_change=process_upload
     )
 
-    # Check if any example images exist in assets before showing the option
     example_exists = os.path.exists(ASSETS_DIR) and any(
         os.path.splitext(f)[0].lower().startswith("example_") and
         os.path.splitext(f)[1].lower() in ('.png', '.jpg', '.jpeg')
@@ -473,7 +457,6 @@ if brand_choice:
     if os.path.exists(ASSETS_DIR):
         all_files = os.listdir(ASSETS_DIR)
 
-        # Brand reference photos (non-signage, non-example)
         seen_basenames = set()
         for f in sorted(all_files):
             name, ext = os.path.splitext(f)
@@ -485,7 +468,6 @@ if brand_choice:
                 auto_refs.append(os.path.join(ASSETS_DIR, f))
                 seen_basenames.add(name.lower())
 
-        # Signage asset — always loaded separately for all brands
         for f in sorted(all_files):
             name, ext = os.path.splitext(f)
             if (search_string in f.lower()
@@ -501,7 +483,6 @@ blue_inset_pct = 30
 client = genai.Client(api_key=api_key, http_options=types.HttpOptions(api_version='v1alpha'))
 
 # --- 5. DISPLAY COLUMNS ---
-# FIX: Single declaration of spinner_placeholder — removed the duplicate that appeared after columns
 spinner_placeholder = st.empty()
 
 col1, col2 = st.columns(2)
@@ -519,12 +500,10 @@ if convert_pressed and base_file and brand_choice and auto_refs:
     with spinner_placeholder:
         with st.spinner(f"Applying {brand_choice} Standards..."):
 
-            # FIX: All logic is now correctly inside a single try block so all errors are caught
             try:
                 process_base = Image.open(base_file)
                 orig_width, orig_height = process_base.size
 
-                # --- PHOTOREALISTIC RENDERING PROTOCOL ---
                 rendering_logic = (
                     "\nRENDERING QUALITY: \n"
                     "- New paint must have a satin stucco finish with specular highlights on sun-facing edges. \n"
@@ -533,7 +512,6 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     "- If signage is placed, render subtle drop shadows and physical mounting depth. \n"
                 )
 
-                # BRAND STANDARDS
                 if "City Express" in brand_choice:
                     brand_instr = (
                         "MATERIAL AUDIT & SPECIFIC OVERRIDE (CITY EXPRESS): \n"
@@ -622,7 +600,6 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                         f"{rendering_logic}"
                     )
 
-                # SIGNAGE LOGIC — strict 1:1 replacement only
                 signage_logic = (
                     "SIGNAGE RULES — READ CAREFULLY BEFORE PLACING ANY LOGO:\n"
                     "STEP A: Count every existing hotel brand sign visible in the input photo. "
@@ -642,7 +619,6 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     "Only the brand artwork on the face of the sign changes."
                 )
 
-                # GLOBAL PROMPT
                 system_instruction = (
                     "TASK: Retouch the surfaces of the exact photo provided. Do not generate a new image.\n\n"
                     "PERSPECTIVE & COMPOSITION LOCK — highest priority, overrides everything:\n"
@@ -671,20 +647,16 @@ if convert_pressed and base_file and brand_choice and auto_refs:
                     f"{rendering_logic}"
                 )
 
-                # Build parts list using proper SDK types
                 user_parts = [process_base]
 
-                # Signage asset
                 if signage_ref:
                     user_parts.append("This is the EXACT SIGNAGE LOGO to reproduce. Same layout, proportions, colors, and icon position — do not modify it.")
                     user_parts.append(Image.open(signage_ref))
 
-                # Brand reference photos
                 for ref_path in auto_refs:
                     user_parts.append("COLOR/MATERIAL REFERENCE ONLY — do not copy this building shape or perspective:")
                     user_parts.append(Image.open(ref_path))
 
-                # All instructions last
                 user_parts.append(
                     f"Edit the first photo above by applying these paint and signage changes only. "
                     f"The input photo is {orig_width}x{orig_height} pixels. "
