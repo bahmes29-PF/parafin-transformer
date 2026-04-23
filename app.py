@@ -128,40 +128,40 @@ def show_auth_page():
         if os.path.exists(gif_path):
             st.image(gif_path, use_container_width=True)
             st.markdown("<div style='margin-bottom:16px'></div>", unsafe_allow_html=True)
-        tab2, tab1 = st.tabs(["Sign In", "Create Account"])
-        with tab1:
-            email = st.text_input("Email", key="signup_email")
-            password = st.text_input("Password", type="password", key="signup_pass", help="At least 6 characters")
-            if st.button("Create Free Account", use_container_width=True, type="primary"):
-                if email and password:
-                    try:
-                        res = supabase.auth.sign_up({"email": email, "password": password})
-                        if res.user and res.user.identities and len(res.user.identities) == 0:
-                            st.error("An account with this email already exists. Please sign in instead.")
-                        elif res.user:
-                            st.success(f"✅ Account created for {email}! You can now sign in.")
-                        else:
-                            st.error("Something went wrong. Try again.")
-                    except Exception as e:
-                        st.error(f"Error: {e}")
-                else:
-                    st.warning("Please enter your email and password.")
-        with tab2:
-            email = st.text_input("Email", key="login_email")
-            password = st.text_input("Password", type="password", key="login_pass")
-            if st.button("Sign In", use_container_width=True, type="primary"):
-                if email and password:
-                    try:
-                        res = supabase.auth.sign_in_with_password({"email": email, "password": password})
-                        if res.user:
-                            st.session_state["user"] = res.user
-                            st.rerun()
-                        else:
-                            st.error("Invalid email or password.")
-                    except Exception as e:
-                        st.error(f"Sign in failed: {e}")
-                else:
-                    st.warning("Please enter your email and password.")
+#     tab2, tab1 = st.tabs(["Sign In", "Create Account"])
+#     with tab1:
+#        email = st.text_input("Email", key="signup_email")
+#            password = st.text_input("Password", type="password", key="signup_pass", help="At least 6 characters")
+#            if st.button("Create Free Account", use_container_width=True, type="primary"):
+#                if email and password:
+#                    try:
+#                        res = supabase.auth.sign_up({"email": email, "password": password})
+#                        if res.user and res.user.identities and len(res.user.identities) == 0:
+#                            st.error("An account with this email already exists. Please sign in instead.")
+#                        elif res.user:
+#                            st.success(f"✅ Account created for {email}! You can now sign in.")
+#                        else:
+#                            st.error("Something went wrong. Try again.")
+#                    except Exception as e:
+#                        st.error(f"Error: {e}")
+#                else:
+#                    st.warning("Please enter your email and password.")
+#        with tab2:
+#            email = st.text_input("Email", key="login_email")
+#            password = st.text_input("Password", type="password", key="login_pass")
+#            if st.button("Sign In", use_container_width=True, type="primary"):
+#                if email and password:
+#                    try:
+#                        res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+#                        if res.user:
+#                            st.session_state["user"] = res.user
+#                            st.rerun()
+#                        else:
+#                            st.error("Invalid email or password.")
+#                    except Exception as e:
+#                        st.error(f"Sign in failed: {e}")
+#                else:
+#                    st.warning("Please enter your email and password.")
 
 if "user" not in st.session_state:
     show_auth_page()
