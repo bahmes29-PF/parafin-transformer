@@ -92,7 +92,7 @@ def show_auth_page():
             st.markdown("<div style='margin-bottom:16px'></div>", unsafe_allow_html=True)
             
         # THE NEW BYPASS BUTTON 
-        if st.button("Click here to start Converting", type="primary", use_container_width=True):
+          if st.button("Click here to start Converting", type="primary", use_container_width=True):
             st.session_state["user"] = "guest_user_bypass"
             st.rerun()
 
