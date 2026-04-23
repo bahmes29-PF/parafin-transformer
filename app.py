@@ -22,9 +22,9 @@ grayed_out_bg = "#F5F5F5"
 grayed_out_text = "#888888"
 
 # --- AUTH GATE ---
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# SUPABASE_URL = os.environ.get("SUPABASE_URL")
+# SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
+# supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def show_auth_page():
     st.markdown(f"""
@@ -162,6 +162,11 @@ def show_auth_page():
 #                        st.error(f"Sign in failed: {e}")
 #                else:
 #                    st.warning("Please enter your email and password.")
+
+# THE NEW BYPASS BUTTON
+        if st.button("Click here to start Converting", type="primary", use_container_width=True):
+            st.session_state["user"] = "guest_user_bypass"
+            st.rerun()   
 
 if "user" not in st.session_state:
     show_auth_page()
