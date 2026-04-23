@@ -61,47 +61,6 @@ def show_auth_page():
             border-color: {parafin_blue} !important;
             color: white !important;
         }}
-        button[kind="secondary"] {{
-            background-color: {grayed_out_bg} !important;
-            color: {grayed_out_text} !important;
-            border-color: #E0E0E0 !important;
-            border-radius: 5px !important;
-            height: 3em !important;
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            opacity: 1 !important;
-            cursor: pointer !important;
-            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
-        }}
-        button[kind="secondary"] * {{
-            color: {grayed_out_text} !important;
-            transition: color 0.15s ease !important;
-        }}
-        button[kind="secondary"]:hover:not(:disabled) {{
-            background-color: #8A8FAA !important;
-            color: white !important;
-            border-color: #8A8FAA !important;
-        }}
-        button[kind="secondary"]:hover:not(:disabled) * {{
-            color: white !important;
-        }}
-        button[kind="secondary"]:active:not(:disabled) {{
-            background-color: {parafin_blue} !important;
-            color: white !important;
-            border-color: {parafin_blue} !important;
-        }}
-        button[kind="secondary"]:active:not(:disabled) * {{
-            color: white !important;
-        }}
-        button:disabled {{
-            background-color: {grayed_out_bg} !important;
-            color: {grayed_out_text} !important;
-            border-color: #E0E0E0 !important;
-            border-radius: 5px !important;
-            height: 3em !important;
-            opacity: 1 !important;
-            cursor: not-allowed !important;
-        }}
         @media (max-width: 768px) {{
             [data-testid="column"] {{
                 width: 100% !important;
@@ -115,19 +74,31 @@ def show_auth_page():
         }}
         </style>
     """, unsafe_allow_html=True)
+    
     ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
     parafin_logo_path = os.path.join(ASSETS_DIR, "PF_Logo_2023.png")
     _, col, _ = st.columns([1, 2, 1])
+    
     with col:
         if os.path.exists(parafin_logo_path):
             st.image(parafin_logo_path, width=120)
         st.title("Hotel Brand Converter")
-        st.caption("Sign in to access the tool — it's free!")
+        st.caption("Access the tool — it's free!")
         st.divider()
+        
         gif_path = os.path.join(os.path.dirname(__file__), "assets", "demo", "demo.gif")
         if os.path.exists(gif_path):
             st.image(gif_path, use_container_width=True)
             st.markdown("<div style='margin-bottom:16px'></div>", unsafe_allow_html=True)
+            
+        # THE NEW BYPASS BUTTON (Correctly Indented)
+        if st.button("Click here to start Converting", type="primary", use_container_width=True):
+            st.session_state["user"] = "guest_user_bypass"
+            st.rerun()
+
+if "user" not in st.session_state:
+    show_auth_page()
+    st.stop()
 #     tab2, tab1 = st.tabs(["Sign In", "Create Account"])
 #     with tab1:
 #        email = st.text_input("Email", key="signup_email")
