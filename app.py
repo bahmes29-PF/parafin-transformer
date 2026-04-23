@@ -7,7 +7,7 @@ from PIL import Image
 import io
 import tomllib
 import base64
-# from supabase import create_client
+from supabase import create_client
 
 # --- PAGE CONFIG (must be first, called once only) ---
 st.set_page_config(
@@ -91,8 +91,8 @@ def show_auth_page():
             st.image(gif_path, use_container_width=True)
             st.markdown("<div style='margin-bottom:16px'></div>", unsafe_allow_html=True)
             
-        # THE NEW BYPASS BUTTON 
-          if st.button("Click here to start Converting", type="primary", use_container_width=True):
+        # THE NEW BYPASS BUTTON (Correctly Indented)
+        if st.button("Click here to start Converting", type="primary", use_container_width=True):
             st.session_state["user"] = "guest_user_bypass"
             st.rerun()
 
